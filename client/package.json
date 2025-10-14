@@ -3,15 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.12.2",
-    "cra-template-pwa-typescript": "2.0.0",
     "date-fns": "^4.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.64.0",
     "react-router-dom": "^7.9.3",
-    "react-scripts": "^0.0.0",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^5.1.0",
+    "workbox-core": "^7.3.0",
+    "workbox-expiration": "^7.3.0",
+    "workbox-precaching": "^7.3.0",
+    "workbox-routing": "^7.3.0",
+    "workbox-strategies": "^7.3.0",
     "zustand": "^5.0.8"
   },
   "scripts": {
@@ -40,8 +46,9 @@
   },
   "devDependencies": {
     "@types/node": "^24.7.2",
+    "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.14"
+    "tailwindcss": "^3.4.18"
   }
 }
