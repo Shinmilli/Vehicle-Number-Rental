@@ -8,9 +8,14 @@ const prisma = new PrismaClient();
 
 // JWT 토큰 생성
 const generateToken = (id: string, type: "user" | "company") => {
-  return jwt.sign({ id, type }, process.env.JWT_SECRET || "your-secret-key", {
-    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
-  });
+  const secret = process.env.JWT_SECRET;
+  const expiresIn = "7d";
+
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined in environment variables");
+  }
+
+  return jwt.sign({ id, type }, secret, { expiresIn });
 };
 
 // 개인(기사) 회원가입
