@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { vehicleService } from "../services/vehicleService";
 import { paymentService } from "../services/paymentService";
 import { Vehicle } from "../types/vehicle";
+import Header from "../components/Header";
 
 const VehicleDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -89,19 +90,14 @@ const VehicleDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <button
-            onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            ← 뒤로가기
-          </button>
-        </div>
-      </header>
-
+      <Header />
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="text-gray-600 hover:text-gray-900 mb-4"
+        >
+          ← 뒤로가기
+        </button>
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           {/* Vehicle Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">

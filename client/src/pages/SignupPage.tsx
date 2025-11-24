@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { authService } from "../services/authService";
+import Header from "../components/Header";
 
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
@@ -121,12 +122,14 @@ const SignupPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900">회원가입</h2>
-          <p className="mt-2 text-sm text-gray-600">영업용 번호 중개 플랫폼</p>
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">회원가입</h2>
+            <p className="mt-2 text-sm text-gray-600">영업용 번호 중개 플랫폼</p>
+          </div>
 
         {/* User Type Toggle */}
         <div className="flex bg-gray-200 rounded-lg p-1 mb-8">
@@ -420,6 +423,7 @@ const SignupPage: React.FC = () => {
           >
             이미 계정이 있으신가요? 로그인하기
           </Link>
+        </div>
         </div>
       </div>
     </div>

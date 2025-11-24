@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { authService } from "../services/authService";
+import Header from "../components/Header";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -90,17 +91,19 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* Logo & Title */}
-        <div>
-          <h2 className="text-center text-3xl font-bold text-gray-900">
-            로그인
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          {/* Logo & Title */}
+          <div>
+            <h2 className="text-center text-3xl font-bold text-gray-900">
+              로그인
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
             영업용 번호 중개 플랫폼
-          </p>
-        </div>
+            </p>
+          </div>
 
         {/* User Type Toggle */}
         <div className="flex bg-gray-200 rounded-lg p-1">
@@ -235,6 +238,7 @@ const LoginPage: React.FC = () => {
             </Link>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

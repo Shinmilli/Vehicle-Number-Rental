@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle } from "../types/vehicle";
+import Header from "../components/Header";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -55,65 +56,35 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      if (userType === "company") {
+        navigate("/company/dashboard");
+      } else {
+        navigate("/driver/dashboard");
+      }
+    } else {
+      navigate("/signup");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              영업용 번호 중개 플랫폼
-            </h1>
-            <div className="space-x-4">
-              {!isAuthenticated ? (
-                <>
-                  <button
-                    onClick={() => navigate("/login")}
-                    className="px-4 py-2 text-gray-700 hover:text-gray-900"
-                  >
-                    로그인
-                  </button>
-                  <button
-                    onClick={() => navigate("/signup")}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    회원가입
-                  </button>
-                </>
-              ) : (
-                <button
-                  onClick={() => {
-                    if (userType === "company") {
-                      navigate("/company/dashboard");
-                    } else {
-                      navigate("/driver/dashboard");
-                    }
-                  }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  대시보드
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-4">브로커 없는 직거래 플랫폼</h2>
+          <h2 className="text-4xl font-bold mb-4">영업용 차량 번호 임대 중개 플랫폼</h2>
           <p className="text-xl mb-8 text-blue-100">
             영업용 차량 번호를 투명하게 거래하세요
           </p>
-          {!isAuthenticated && (
-            <button
-              onClick={() => navigate("/signup")}
-              className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition"
-            >
-              지금 시작하기
-            </button>
-          )}
+          <button
+            onClick={handleGetStarted}
+            className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition"
+          >
+            지금 시작하기
+          </button>
         </div>
       </section>
 
@@ -163,7 +134,7 @@ const HomePage: React.FC = () => {
               <div className="text-4xl mb-4">💰</div>
               <h4 className="text-xl font-semibold mb-2">투명한 가격</h4>
               <p className="text-gray-600">
-                브로커 수수료 없이 합리적인 가격으로 직거래할 수 있습니다.
+                중간 수수료 없이 합리적인 가격으로 직거래할 수 있습니다.
               </p>
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
@@ -187,7 +158,7 @@ const HomePage: React.FC = () => {
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2025 영업용번호 중개 플랫폼. All rights reserved.</p>
+          <p>&copy; 2025 JUNGBU. All rights reserved.</p>
         </div>
       </footer>
     </div>
