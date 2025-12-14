@@ -26,7 +26,6 @@ const SignupPage: React.FC = () => {
     businessNumber: "",
     companyName: "",
     representative: "",
-    address: "",
     contactPerson: "",
     phone: "",
     email: "",
@@ -38,27 +37,38 @@ const SignupPage: React.FC = () => {
 
   const handleVerifyBusiness = async () => {
     if (!companyData.businessNumber) {
-      window.alert("사업자등록번호를 입력하세요.");
+      setError("사업자등록번호를 입력하세요.");
       return;
     }
 
+    setError("");
+    setBusinessVerified(false);
+
     try {
-      const isValid = await authService.verifyBusinessNumber(
+      const result = await authService.verifyBusinessNumber(
         companyData.businessNumber
       );
-      if (isValid) {
+      if (result.valid) {
         setBusinessVerified(true);
-        window.alert("사업자등록번호 인증이 완료되었습니다.");
+        setError(""); // 성공 시 에러 메시지 제거
       } else {
-        window.alert("유효하지 않은 사업자등록번호입니다.");
+        setBusinessVerified(false);
+        setError(result.message || "유효하지 않은 사업자등록번호입니다.");
       }
-    } catch (err) {
-      window.alert("사업자등록번호 인증에 실패했습니다.");
+    } catch (err: any) {
+      setBusinessVerified(false);
+      const errorMessage = err.response?.data?.message || "사업자등록번호 인증에 실패했습니다.";
+      setError(errorMessage);
     }
   };
 
   const handleUserSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!userData.name.trim() || !userData.phone.trim() || !userData.password.trim() || !userData.confirmPassword.trim()) {
+      setError("모든 필드를 입력해주세요.");
+      return;
+    }
 
     if (userData.password !== userData.confirmPassword) {
       setError("비밀번호가 일치하지 않습니다.");
@@ -92,6 +102,19 @@ const SignupPage: React.FC = () => {
       return;
     }
 
+    if (
+      !companyData.businessNumber.trim() ||
+      !companyData.companyName.trim() ||
+      !companyData.representative.trim() ||
+      !companyData.contactPerson.trim() ||
+      !companyData.phone.trim() ||
+      !companyData.password.trim() ||
+      !companyData.confirmPassword.trim()
+    ) {
+      setError("모든 필드를 입력해주세요.");
+      return;
+    }
+
     if (companyData.password !== companyData.confirmPassword) {
       setError("비밀번호가 일치하지 않습니다.");
       return;
@@ -105,7 +128,6 @@ const SignupPage: React.FC = () => {
         businessNumber: companyData.businessNumber,
         companyName: companyData.companyName,
         representative: companyData.representative,
-        address: companyData.address,
         contactPerson: companyData.contactPerson,
         phone: companyData.phone,
         email: companyData.email,
@@ -305,21 +327,6 @@ const SignupPage: React.FC = () => {
                     ...companyData,
                     representative: e.target.value,
                   })
-                }
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                주소
-              </label>
-              <input
-                type="text"
-                required
-                value={companyData.address}
-                onChange={(e) =>
-                  setCompanyData({ ...companyData, address: e.target.value })
                 }
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
               />

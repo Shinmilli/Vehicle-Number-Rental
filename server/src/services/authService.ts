@@ -15,7 +15,6 @@ export interface RegisterCompanyData {
   businessNumber: string;
   companyName: string;
   representative: string;
-  address: string;
   contactPerson: string;
   phone: string;
   email?: string;
@@ -33,6 +32,10 @@ export class AuthService {
    * 개인 사용자 회원가입
    */
   async registerUser(data: RegisterUserData) {
+    if (!data.name?.trim() || !data.phone?.trim() || !data.password?.trim()) {
+      throw new Error("모든 필드를 입력해주세요.");
+    }
+
     // 전화번호 중복 확인
     const existingUser = await userRepository.findByPhone(data.phone);
     if (existingUser) {
@@ -69,6 +72,17 @@ export class AuthService {
    * 회사 회원가입
    */
   async registerCompany(data: RegisterCompanyData) {
+    if (
+      !data.businessNumber?.trim() ||
+      !data.companyName?.trim() ||
+      !data.representative?.trim() ||
+      !data.contactPerson?.trim() ||
+      !data.phone?.trim() ||
+      !data.password?.trim()
+    ) {
+      throw new Error("모든 필드를 입력해주세요.");
+    }
+
     // 사업자등록번호 중복 확인
     const existingCompany = await companyRepository.findByBusinessNumber(
       data.businessNumber
@@ -77,20 +91,29 @@ export class AuthService {
       throw new Error("이미 등록된 사업자등록번호입니다.");
     }
 
+    // 사업자등록번호 인증 확인
+    const { isBusinessNumberVerified } = await import("../services/businessNumberService");
+    const isVerified = isBusinessNumberVerified(data.businessNumber);
+    if (!isVerified) {
+      throw new Error("사업자등록번호 인증이 필요합니다. 먼저 인증을 완료해주세요.");
+    }
+
     // 비밀번호 해시화
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    // 회사 생성
+    // 회사 생성 (인증 상태를 true로 설정)
     const company = await companyRepository.create({
       businessNumber: data.businessNumber,
       companyName: data.companyName,
       representative: data.representative,
-      address: data.address,
       contactPerson: data.contactPerson,
       phone: data.phone,
       email: data.email,
       password: hashedPassword,
     });
+
+    // 인증 상태 업데이트
+    await companyRepository.updateVerification(company.id, true);
 
     // 토큰 생성
     const token = generateToken(company.id, "company");
@@ -103,7 +126,7 @@ export class AuthService {
         companyName: company.companyName,
         representative: company.representative,
         phone: company.phone,
-        verified: company.verified,
+        verified: true, // 인증 완료 상태
         createdAt: company.createdAt,
       },
       userType: "company" as const,

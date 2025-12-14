@@ -81,14 +81,17 @@ export class CompanyRepository {
     businessNumber: string;
     companyName: string;
     representative: string;
-    address: string;
     contactPerson: string;
     phone: string;
     email?: string;
     password: string;
+    address?: string; // optional, default empty string
   }): Promise<Company> {
     return prisma.company.create({
-      data,
+      data: {
+        ...data,
+        address: data.address ?? "",
+      },
     });
   }
 

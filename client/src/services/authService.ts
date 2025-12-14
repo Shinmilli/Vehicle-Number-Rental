@@ -8,7 +8,6 @@ export const authService = {
     businessNumber: string;
     companyName: string;
     representative: string;
-    address: string;
     contactPerson: string;
     phone: string;
     email?: string;
@@ -39,11 +38,14 @@ export const authService = {
   },
 
   // 사업자번호 인증
-  verifyBusinessNumber: async (businessNumber: string): Promise<boolean> => {
+  verifyBusinessNumber: async (businessNumber: string): Promise<{ valid: boolean; message: string }> => {
     const response = await api.post("/auth/verify-business", {
       businessNumber,
     });
-    return response.data.valid;
+    return {
+      valid: response.data.valid,
+      message: response.data.message || (response.data.valid ? "인증이 완료되었습니다." : "인증에 실패했습니다."),
+    };
   },
 
   // 현재 사용자 정보
