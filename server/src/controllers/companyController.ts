@@ -107,3 +107,30 @@ export const getCompanyStats = async (req: Request, res: Response) => {
     res.status(500).json({ message });
   }
 };
+
+// 연락받을 번호 업데이트
+export const updateContactPhone = async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "인증이 필요합니다." });
+    }
+
+    const { userId, userType } = req.user;
+    const { contactPhone } = req.body;
+
+    if (userType !== "company") {
+      return res.status(403).json({ message: "회사만 수정할 수 있습니다." });
+    }
+
+    if (!contactPhone?.trim()) {
+      return res.status(400).json({ message: "연락받을 번호를 입력해주세요." });
+    }
+
+    const updatedCompany = await companyService.updateContactPhone(userId, contactPhone);
+    res.json(updatedCompany);
+  } catch (error) {
+    logger.error("Update contact phone error", error instanceof Error ? error : new Error(String(error)));
+    const message = error instanceof Error ? error.message : "연락받을 번호 업데이트에 실패했습니다.";
+    res.status(500).json({ message });
+  }
+};

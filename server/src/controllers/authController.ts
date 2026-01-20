@@ -7,8 +7,8 @@ import { logger } from "../utils/logger";
 // 개인(기사) 회원가입
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { name, phone, password } = req.body;
-    const result = await authService.registerUser({ name, phone, password });
+    const { name, phone, email, password } = req.body;
+    const result = await authService.registerUser({ name, phone, email, password });
     res.status(201).json(result);
   } catch (error) {
     logger.error("Register user error", error instanceof Error ? error : new Error(String(error)));
@@ -74,44 +74,6 @@ export const verifyBusinessNumber = async (req: Request, res: Response) => {
   }
 };
 
-// 개인 사용자 본인인증 (전화번호 인증)
-export const verifyUser = async (req: Request, res: Response) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "인증이 필요합니다." });
-    }
-
-    const { userId, userType } = req.user;
-    const { verificationCode } = req.body;
-
-    if (userType !== "user") {
-      return res
-        .status(403)
-        .json({ message: "개인 사용자만 인증할 수 있습니다." });
-    }
-
-    const result = await authService.verifyUser(userId, verificationCode);
-    res.json(result);
-  } catch (error) {
-    logger.error("Verify user error", error instanceof Error ? error : new Error(String(error)));
-    const message = error instanceof Error ? error.message : "인증에 실패했습니다.";
-    res.status(400).json({ message });
-  }
-};
-
-// 인증번호 발송 (시뮬레이션)
-export const sendVerificationCode = async (req: Request, res: Response) => {
-  try {
-    const { phone } = req.body;
-    const result = await businessNumberService.sendVerificationCode(phone);
-    res.json(result);
-  } catch (error) {
-    logger.error("Send verification code error", error instanceof Error ? error : new Error(String(error)));
-    const message = error instanceof Error ? error.message : "인증번호 발송에 실패했습니다.";
-    const statusCode = message.includes("형식") ? 400 : 500;
-    res.status(statusCode).json({ message });
-  }
-};
 
 // 현재 사용자 정보
 export const getCurrentUser = async (req: Request, res: Response) => {

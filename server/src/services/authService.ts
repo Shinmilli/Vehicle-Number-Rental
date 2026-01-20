@@ -4,10 +4,12 @@ import { userRepository } from "../repositories/userRepository";
 import { companyRepository } from "../repositories/companyRepository";
 import { generateToken } from "../utils/jwt";
 import { logger } from "../utils/logger";
+import { prisma } from "../utils/prisma";
 
 export interface RegisterUserData {
   name: string;
   phone: string;
+  email: string;
   password: string;
 }
 
@@ -33,13 +35,27 @@ export class AuthService {
    */
   async registerUser(data: RegisterUserData) {
     if (!data.name?.trim() || !data.phone?.trim() || !data.password?.trim()) {
-      throw new Error("모든 필드를 입력해주세요.");
+      throw new Error("이름, 전화번호, 비밀번호를 입력해주세요.");
+    }
+    
+    if (!data.email?.trim()) {
+      throw new Error("이메일을 입력해주세요.");
     }
 
     // 전화번호 중복 확인
     const existingUser = await userRepository.findByPhone(data.phone);
     if (existingUser) {
       throw new Error("이미 등록된 전화번호입니다.");
+    }
+
+    // 이메일 중복 확인 (이메일이 제공된 경우)
+    if (data.email) {
+      const existingUserByEmail = await prisma.user.findUnique({
+        where: { email: data.email },
+      });
+      if (existingUserByEmail) {
+        throw new Error("이미 등록된 이메일입니다.");
+      }
     }
 
     // 비밀번호 해시화
@@ -49,6 +65,7 @@ export class AuthService {
     const user = await userRepository.create({
       name: data.name,
       phone: data.phone,
+      email: data.email,
       password: hashedPassword,
     });
 
@@ -61,6 +78,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         phone: user.phone,
+        email: user.email,
         verified: user.verified,
         createdAt: user.createdAt,
       },
@@ -227,6 +245,7 @@ export class AuthService {
           id: user.id,
           name: user.name,
           phone: user.phone,
+          email: user.email,
           verified: user.verified,
           createdAt: user.createdAt,
         },
@@ -253,26 +272,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * 사용자 인증 (전화번호 인증)
-   */
-  async verifyUser(userId: string, verificationCode: string) {
-    // TODO: 실제로는 SMS 인증 API를 호출해야 함
-    // 여기서는 시뮬레이션으로 처리
-    const validCode = "123456"; // 실제로는 랜덤 생성된 코드
-
-    if (verificationCode !== validCode) {
-      throw new Error("인증번호가 올바르지 않습니다.");
-    }
-
-    // 사용자 인증 상태 업데이트
-    await userRepository.updateVerification(userId, true);
-
-    return {
-      valid: true,
-      message: "본인인증이 완료되었습니다.",
-    };
-  }
 }
 
 export const authService = new AuthService();

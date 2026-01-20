@@ -81,6 +81,21 @@ export class CompanyService {
   async getCompanyStats(companyId: string) {
     return companyRepository.getStats(companyId);
   }
+
+  /**
+   * 연락받을 번호 업데이트
+   */
+  async updateContactPhone(companyId: string, contactPhone: string) {
+    const updatedCompany = await companyRepository.update(companyId, { contactPhone });
+
+    return {
+      id: updatedCompany.id,
+      businessNumber: updatedCompany.businessNumber,
+      companyName: updatedCompany.companyName,
+      contactPhone: updatedCompany.contactPhone,
+      updatedAt: updatedCompany.updatedAt,
+    };
+  }
 }
 
 export const companyService = new CompanyService();

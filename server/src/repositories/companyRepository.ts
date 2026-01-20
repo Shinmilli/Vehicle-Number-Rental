@@ -83,6 +83,7 @@ export class CompanyRepository {
     representative: string;
     contactPerson: string;
     phone: string;
+    contactPhone?: string;
     email?: string;
     password: string;
     address?: string; // optional, default empty string
