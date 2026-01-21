@@ -60,7 +60,8 @@ export const authService = {
     name?: string;
     phone?: string;
     email?: string;
-    password?: string;
+    currentPassword?: string;
+    newPassword?: string;
   }): Promise<AuthResponse> => {
     const response = await api.put("/auth/profile", data);
     return response.data;
@@ -79,6 +80,9 @@ export const authService = {
     contactPerson?: string;
     phone?: string;
     email?: string;
+    contactPhone?: string;
+    currentPassword?: string;
+    newPassword?: string;
   }) => {
     const response = await api.put("/companies/profile", data);
     return response.data;

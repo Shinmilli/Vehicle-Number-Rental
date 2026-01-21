@@ -95,7 +95,7 @@ export class AuthService {
   /**
    * 개인 사용자 프로필 업데이트
    */
-  async updateUserProfile(userId: string, data: Partial<RegisterUserData> & { password?: string }) {
+  async updateUserProfile(userId: string, data: Partial<RegisterUserData> & { currentPassword?: string; newPassword?: string }) {
     const user = await userRepository.findById(userId);
     if (!user) {
       throw new Error("사용자를 찾을 수 없습니다.");
@@ -130,8 +130,16 @@ export class AuthService {
       updates.email = email;
     }
 
-    if (data.password?.trim()) {
-      updates.password = await bcrypt.hash(data.password.trim(), 10);
+    // 비밀번호 변경 시 기존 비밀번호 확인
+    if (data.newPassword?.trim()) {
+      if (!data.currentPassword?.trim()) {
+        throw new Error("기존 비밀번호를 입력해주세요.");
+      }
+      const isCurrentPasswordValid = await bcrypt.compare(data.currentPassword.trim(), user.password);
+      if (!isCurrentPasswordValid) {
+        throw new Error("기존 비밀번호가 올바르지 않습니다.");
+      }
+      updates.password = await bcrypt.hash(data.newPassword.trim(), 10);
     }
 
     const updated = await userRepository.update(user.id, updates);

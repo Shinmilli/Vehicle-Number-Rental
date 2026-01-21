@@ -41,6 +41,10 @@ export const updateCompanyProfile = async (req: Request, res: Response) => {
       contactPerson,
       phone,
       email,
+      contactPhone,
+      password,
+      currentPassword,
+      newPassword,
     } = req.body;
 
     if (userType !== "company") {
@@ -54,6 +58,10 @@ export const updateCompanyProfile = async (req: Request, res: Response) => {
       contactPerson,
       phone,
       email,
+      contactPhone,
+      password,
+      currentPassword,
+      newPassword,
     });
 
     res.json(updatedCompany);

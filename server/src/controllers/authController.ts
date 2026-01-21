@@ -108,19 +108,20 @@ export const updateUserProfile = async (req: Request, res: Response) => {
       return res.status(403).json({ message: "개인 사용자만 수정할 수 있습니다." });
     }
 
-    const { name, phone, email, password } = req.body;
+    const { name, phone, email, currentPassword, newPassword } = req.body;
     const result = await authService.updateUserProfile(req.user.userId, {
       name,
       phone,
       email,
-      password,
+      currentPassword,
+      newPassword,
     });
 
     res.json({ user: result, userType: "user" as const });
   } catch (error) {
     logger.error("Update user profile error", error instanceof Error ? error : new Error(String(error)));
     const message = error instanceof Error ? error.message : "프로필 수정에 실패했습니다.";
-    const statusCode = message.includes("등록된") || message.includes("형식") ? 400 : 500;
+    const statusCode = message.includes("등록된") || message.includes("형식") || message.includes("비밀번호") ? 400 : 500;
     res.status(statusCode).json({ message });
   }
 };

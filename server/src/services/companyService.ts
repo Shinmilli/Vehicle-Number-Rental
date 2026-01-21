@@ -1,5 +1,6 @@
 // src/services/companyService.ts
 import { companyRepository } from "../repositories/companyRepository";
+import bcrypt from "bcryptjs";
 
 export interface UpdateCompanyData {
   companyName?: string;
@@ -8,6 +9,10 @@ export interface UpdateCompanyData {
   contactPerson?: string;
   phone?: string;
   email?: string;
+  contactPhone?: string;
+  password?: string; // 기존 호환성 유지
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 export class CompanyService {
@@ -28,6 +33,7 @@ export class CompanyService {
       address: company.address,
       contactPerson: company.contactPerson,
       phone: company.phone,
+      contactPhone: company.contactPhone,
       email: company.email,
       verified: company.verified,
       verifiedAt: company.verifiedAt,
@@ -40,7 +46,37 @@ export class CompanyService {
    * 회사 정보 수정
    */
   async updateCompanyProfile(companyId: string, data: UpdateCompanyData) {
-    const updatedCompany = await companyRepository.update(companyId, data);
+    const company = await companyRepository.findById(companyId);
+    if (!company) {
+      throw new Error("회사 정보를 찾을 수 없습니다.");
+    }
+
+    const updateData: any = { ...data };
+
+    // 비밀번호 변경 시 기존 비밀번호 확인
+    if (data.newPassword?.trim()) {
+      // 새 비밀번호가 있으면 기존 비밀번호 확인 필요
+      if (!data.currentPassword?.trim()) {
+        throw new Error("기존 비밀번호를 입력해주세요.");
+      }
+      const isCurrentPasswordValid = await bcrypt.compare(data.currentPassword.trim(), company.password);
+      if (!isCurrentPasswordValid) {
+        throw new Error("기존 비밀번호가 올바르지 않습니다.");
+      }
+      updateData.password = await bcrypt.hash(data.newPassword.trim(), 10);
+    } else if (data.password?.trim()) {
+      // 기존 방식 호환성 유지 (currentPassword 없이 password만 오는 경우)
+      updateData.password = await bcrypt.hash(data.password.trim(), 10);
+    } else {
+      // 비밀번호가 없으면 업데이트에서 제외
+      delete updateData.password;
+    }
+
+    // currentPassword와 newPassword는 DB에 저장하지 않으므로 제거
+    delete updateData.currentPassword;
+    delete updateData.newPassword;
+
+    const updatedCompany = await companyRepository.update(companyId, updateData);
 
     return {
       id: updatedCompany.id,
@@ -50,6 +86,7 @@ export class CompanyService {
       address: updatedCompany.address,
       contactPerson: updatedCompany.contactPerson,
       phone: updatedCompany.phone,
+      contactPhone: updatedCompany.contactPhone,
       email: updatedCompany.email,
       verified: updatedCompany.verified,
       updatedAt: updatedCompany.updatedAt,
