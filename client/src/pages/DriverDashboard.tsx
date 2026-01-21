@@ -18,7 +18,6 @@ const DriverDashboard: React.FC = () => {
   });
 
   const regions = ["서울", "경기", "강원", "충청", "전라", "경상"];
-  const vehicleTypes = ["화물차"];
 
   useEffect(() => {
     loadVehicles();
@@ -53,7 +52,7 @@ const DriverDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">검색 필터</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 지역 필터 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -70,30 +69,6 @@ const DriverDashboard: React.FC = () => {
                 {regions.map((region) => (
                   <option key={region} value={region}>
                     {region}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 차종 필터 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                차종
-              </label>
-              <select
-                value={filter.vehicleType || ""}
-                onChange={(e) =>
-                  setFilter({
-                    ...filter,
-                    vehicleType: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="">전체</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
                   </option>
                 ))}
               </select>

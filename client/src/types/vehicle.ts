@@ -16,6 +16,7 @@ export interface Vehicle {
     companyName: string;
     phone: string;
     contactPerson: string;
+    contactPhone?: string;
   };
 }
 

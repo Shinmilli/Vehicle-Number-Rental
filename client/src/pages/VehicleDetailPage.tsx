@@ -14,6 +14,12 @@ const VehicleDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasPaid, setHasPaid] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [contactInfo, setContactInfo] = useState<{
+    companyName: string;
+    contactPerson: string;
+    contactPhone?: string;
+    phone: string;
+  } | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -44,6 +50,23 @@ const VehicleDetailPage: React.FC = () => {
         (p) => p.vehicleId === vehicleId && p.status === "completed"
       );
       setHasPaid(paid);
+      
+      // 결제가 완료된 경우 연락처 정보 가져오기
+      if (paid) {
+        try {
+          const contactData = await paymentService.getContactAfterPayment(vehicleId);
+          if (contactData.company) {
+            setContactInfo({
+              companyName: contactData.company.companyName || "",
+              contactPerson: contactData.company.contactPerson || "",
+              contactPhone: contactData.company.contactPhone || undefined,
+              phone: contactData.company.phone || "",
+            });
+          }
+        } catch (error) {
+          console.error("Failed to load contact info:", error);
+        }
+      }
     } catch (error) {
       console.error("Failed to check payment:", error);
     }
@@ -65,6 +88,21 @@ const VehicleDetailPage: React.FC = () => {
       // 여기서는 간단히 완료 처리
       window.alert("결제가 완료되었습니다!");
       setHasPaid(true);
+      
+      // 결제 완료 후 연락처 정보 가져오기
+      try {
+        const contactData = await paymentService.getContactAfterPayment(id);
+        if (contactData.company) {
+          setContactInfo({
+            companyName: contactData.company.companyName || "",
+            contactPerson: contactData.company.contactPerson || "",
+            contactPhone: contactData.company.contactPhone || undefined,
+            phone: contactData.company.phone || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load contact info:", error);
+      }
     } catch (error: any) {
       window.alert(error.response?.data?.message || "결제에 실패했습니다.");
     } finally {
@@ -168,22 +206,22 @@ const VehicleDetailPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-700">회사명</span>
                     <span className="font-semibold">
-                      {vehicle.company?.companyName}
+                      {contactInfo?.companyName || vehicle.company?.companyName || "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-700">담당자</span>
                     <span className="font-semibold">
-                      {vehicle.company?.contactPerson}
+                      {contactInfo?.contactPerson || vehicle.company?.contactPerson || "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-700">전화번호</span>
                     <a
-                      href={`tel:${vehicle.company?.phone}`}
+                      href={`tel:${contactInfo?.contactPhone || contactInfo?.phone || vehicle.company?.phone || ""}`}
                       className="font-semibold text-blue-600 hover:underline"
                     >
-                      {vehicle.company?.phone}
+                      {contactInfo?.contactPhone || contactInfo?.phone || vehicle.company?.phone || "-"}
                     </a>
                   </div>
                   <div className="mt-4 pt-4 border-t">
