@@ -42,6 +42,41 @@ const SignupPage: React.FC = () => {
   const [showContactPhoneModal, setShowContactPhoneModal] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
 
+  // 비밀번호 검증 함수 (8자 이상, 영어와 숫자 포함)
+  const validatePassword = (password: string): boolean => {
+    if (password.length < 8) return false;
+    const hasLetter = /[a-zA-Z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    return hasLetter && hasNumber;
+  };
+
+  // 개인 사용자 회원가입 버튼 활성화 조건
+  const isUserFormValid = () => {
+    return (
+      userData.name.trim() !== "" &&
+      userData.phone.trim() !== "" &&
+      userData.email.trim() !== "" &&
+      validatePassword(userData.password) &&
+      userData.password === userData.confirmPassword &&
+      userData.confirmPassword.trim() !== ""
+    );
+  };
+
+  // 회사 회원가입 버튼 활성화 조건
+  const isCompanyFormValid = () => {
+    return (
+      businessVerified &&
+      companyData.businessNumber.trim() !== "" &&
+      companyData.companyName.trim() !== "" &&
+      companyData.representative.trim() !== "" &&
+      companyData.contactPerson.trim() !== "" &&
+      companyData.phone.trim() !== "" &&
+      validatePassword(companyData.password) &&
+      companyData.password === companyData.confirmPassword &&
+      companyData.confirmPassword.trim() !== ""
+    );
+  };
+
   const handleVerifyBusiness = async () => {
     if (!companyData.businessNumber) {
       setError("사업자등록번호를 입력하세요.");
@@ -74,6 +109,12 @@ const SignupPage: React.FC = () => {
 
     if (!userData.name.trim() || !userData.phone.trim() || !userData.email.trim() || !userData.password.trim() || !userData.confirmPassword.trim()) {
       setError("모든 필드를 입력해주세요.");
+      return;
+    }
+
+    // 비밀번호 조건 검증
+    if (!validatePassword(userData.password)) {
+      setError("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
       return;
     }
 
@@ -120,6 +161,12 @@ const SignupPage: React.FC = () => {
       !companyData.confirmPassword.trim()
     ) {
       setError("모든 필드를 입력해주세요.");
+      return;
+    }
+
+    // 비밀번호 조건 검증
+    if (!validatePassword(companyData.password)) {
+      setError("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
       return;
     }
 
@@ -257,6 +304,7 @@ const SignupPage: React.FC = () => {
                     setUserData({ ...userData, password: e.target.value })
                   }
                   className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md"
+                  placeholder="8자 이상, 영어와 숫자 포함"
                 />
                 <button
                   type="button"
@@ -310,12 +358,26 @@ const SignupPage: React.FC = () => {
                   )}
                 </button>
               </div>
+              {userData.password && !validatePassword(userData.password) && (
+                <p className="mt-1 text-xs text-red-500">
+                  비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.
+                </p>
+              )}
+              {userData.password && userData.confirmPassword && userData.password !== userData.confirmPassword && (
+                <p className="mt-1 text-xs text-red-500">
+                  비밀번호가 일치하지 않습니다.
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              disabled={isLoading || !isUserFormValid()}
+              className={`w-full py-3 px-4 rounded-md transition ${
+                isUserFormValid() && !isLoading
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               {isLoading ? "가입 중..." : "회원가입"}
             </button>
@@ -455,6 +517,7 @@ const SignupPage: React.FC = () => {
                     setCompanyData({ ...companyData, password: e.target.value })
                   }
                   className="mt-1 block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md"
+                  placeholder="8자 이상, 영어와 숫자 포함"
                 />
                 <button
                   type="button"
@@ -511,12 +574,26 @@ const SignupPage: React.FC = () => {
                   )}
                 </button>
               </div>
+              {companyData.password && !validatePassword(companyData.password) && (
+                <p className="mt-1 text-xs text-red-500">
+                  비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.
+                </p>
+              )}
+              {companyData.password && companyData.confirmPassword && companyData.password !== companyData.confirmPassword && (
+                <p className="mt-1 text-xs text-red-500">
+                  비밀번호가 일치하지 않습니다.
+                </p>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={isLoading || !businessVerified}
-              className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+              disabled={isLoading || !isCompanyFormValid()}
+              className={`w-full py-3 px-4 rounded-md transition ${
+                isCompanyFormValid() && !isLoading
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               {isLoading ? "가입 중..." : "회원가입"}
             </button>
@@ -570,19 +647,9 @@ const SignupPage: React.FC = () => {
                     setError(err.response?.data?.message || "번호 저장에 실패했습니다.");
                   }
                 }}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
               >
                 저장
-              </button>
-              <button
-                onClick={() => {
-                  setShowContactPhoneModal(false);
-                  setIsLoading(false);
-                  navigate("/company/dashboard");
-                }}
-                className="flex-1 py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-              >
-                나중에
               </button>
             </div>
           </div>

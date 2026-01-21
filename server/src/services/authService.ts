@@ -64,6 +64,12 @@ export class AuthService {
       throw new Error("이미 등록된 이메일입니다.");
     }
 
+    // 비밀번호 조건 검증 (8자 이상, 영어와 숫자 포함)
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+    if (!passwordRegex.test(data.password)) {
+      throw new Error("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
+    }
+
     // 비밀번호 해시화
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
@@ -139,6 +145,11 @@ export class AuthService {
       if (!isCurrentPasswordValid) {
         throw new Error("기존 비밀번호가 올바르지 않습니다.");
       }
+      // 새 비밀번호 조건 검증 (8자 이상, 영어와 숫자 포함)
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+      if (!passwordRegex.test(data.newPassword)) {
+        throw new Error("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
+      }
       updates.password = await bcrypt.hash(data.newPassword.trim(), 10);
     }
 
@@ -182,6 +193,12 @@ export class AuthService {
     const isVerified = isBusinessNumberVerified(data.businessNumber);
     if (!isVerified) {
       throw new Error("사업자등록번호 인증이 필요합니다. 먼저 인증을 완료해주세요.");
+    }
+
+    // 비밀번호 조건 검증 (8자 이상, 영어와 숫자 포함)
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+    if (!passwordRegex.test(data.password)) {
+      throw new Error("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
     }
 
     // 비밀번호 해시화

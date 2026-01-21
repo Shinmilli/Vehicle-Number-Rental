@@ -63,9 +63,19 @@ export class CompanyService {
       if (!isCurrentPasswordValid) {
         throw new Error("기존 비밀번호가 올바르지 않습니다.");
       }
+      // 새 비밀번호 조건 검증 (8자 이상, 영어와 숫자 포함)
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+      if (!passwordRegex.test(data.newPassword)) {
+        throw new Error("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
+      }
       updateData.password = await bcrypt.hash(data.newPassword.trim(), 10);
     } else if (data.password?.trim()) {
       // 기존 방식 호환성 유지 (currentPassword 없이 password만 오는 경우)
+      // 비밀번호 조건 검증
+      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/;
+      if (!passwordRegex.test(data.password)) {
+        throw new Error("비밀번호는 8자 이상이며 영어와 숫자를 포함해야 합니다.");
+      }
       updateData.password = await bcrypt.hash(data.password.trim(), 10);
     } else {
       // 비밀번호가 없으면 업데이트에서 제외
