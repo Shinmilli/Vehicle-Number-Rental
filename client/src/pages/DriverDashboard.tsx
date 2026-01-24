@@ -1,14 +1,16 @@
 // src/pages/DriverDashboard.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle, VehicleFilter } from "../types/vehicle";
+import Header from "../components/Header";
+import { COLORS } from "../constants/colors";
 
 const DriverDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,13 +19,8 @@ const DriverDashboard: React.FC = () => {
   });
 
   const regions = ["서울", "경기", "강원", "충청", "전라", "경상"];
-  const vehicleTypes = ["택시", "화물차", "버스", "기타"];
 
-  useEffect(() => {
-    loadVehicles();
-  }, [filter]);
-
-  const loadVehicles = async () => {
+  const loadVehicles = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await vehicleService.getVehicles(filter);
@@ -33,43 +30,25 @@ const DriverDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    loadVehicles();
+  }, [loadVehicles]);
 
   const handleVehicleClick = (vehicleId: string) => {
     navigate(`/vehicle/${vehicleId}`);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">기사 대시보드</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-600">{(user as any)?.name}님</span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Header title="기사 대시보드" />
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Filters */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-lg font-semibold mb-4">검색 필터</h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* 지역 필터 */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -86,30 +65,6 @@ const DriverDashboard: React.FC = () => {
                 {regions.map((region) => (
                   <option key={region} value={region}>
                     {region}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* 차종 필터 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                차종
-              </label>
-              <select
-                value={filter.vehicleType || ""}
-                onChange={(e) =>
-                  setFilter({
-                    ...filter,
-                    vehicleType: e.target.value || undefined,
-                  })
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              >
-                <option value="">전체</option>
-                {vehicleTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
                   </option>
                 ))}
               </select>
@@ -151,7 +106,10 @@ const DriverDashboard: React.FC = () => {
 
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div 
+                className="inline-block animate-spin rounded-full h-12 w-12 border-b-2"
+                style={{ borderColor: COLORS.navy.primary }}
+              ></div>
             </div>
           ) : vehicles.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -174,7 +132,10 @@ const DriverDashboard: React.FC = () => {
                         {vehicle.vehicleType}
                       </p>
                     </div>
-                    <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">
+                    <span 
+                      className="px-2 py-1 text-xs rounded"
+                      style={{ backgroundColor: COLORS.navy.light, color: COLORS.navy.primary }}
+                    >
                       {vehicle.region}
                     </span>
                   </div>
@@ -204,20 +165,23 @@ const DriverDashboard: React.FC = () => {
                       <span className="text-gray-900 font-semibold">
                         월 지입료
                       </span>
-                      <span className="text-blue-600 font-bold">
+                      <span className="font-bold" style={{ color: COLORS.navy.primary }}>
                         {vehicle.monthlyFee.toLocaleString()}원
                       </span>
                     </div>
                   </div>
 
                   <button
-                    className="mt-4 w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    className="mt-4 w-full py-2 text-white rounded-md transition"
+                    style={{ backgroundColor: COLORS.navy.primary }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.hover)}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.primary)}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleVehicleClick(vehicle.id);
                     }}
                   >
-                    상세보기 (10,000원)
+                    상세보기
                   </button>
                 </div>
               ))}

@@ -27,4 +27,10 @@ export const paymentService = {
     const response = await api.get("/payments/my");
     return response.data;
   },
+
+  // 결제 완료 후 연락처 조회
+  getContactAfterPayment: async (vehicleId: string) => {
+    const response = await api.get(`/payments/contact/${vehicleId}`);
+    return response.data;
+  },
 };

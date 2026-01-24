@@ -5,9 +5,8 @@ import {
   registerCompany,
   login,
   verifyBusinessNumber,
-  verifyUser,
-  sendVerificationCode,
   getCurrentUser,
+  updateUserProfile,
 } from "../controllers/authController";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
@@ -20,10 +19,9 @@ router.post("/login", login);
 
 // 인증 관련
 router.post("/verify-business", verifyBusinessNumber);
-router.post("/send-verification", sendVerificationCode);
-router.post("/verify-user", authMiddleware, verifyUser);
 
 // 사용자 정보
 router.get("/me", authMiddleware, getCurrentUser);
+router.put("/profile", authMiddleware, updateUserProfile);
 
 export default router;

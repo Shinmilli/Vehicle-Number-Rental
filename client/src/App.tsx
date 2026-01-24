@@ -12,6 +12,10 @@ import DriverDashboard from "./pages/DriverDashboard";
 import VehicleDetailPage from "./pages/VehicleDetailPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
+import ProfilePage from "./pages/ProfilePage";
+
+// Components
+import InstallPrompt from "./components/InstallPrompt";
 
 // Protected Route Component
 const ProtectedRoute: React.FC<{
@@ -41,11 +45,22 @@ function App() {
 
   return (
     <BrowserRouter>
+      <InstallPrompt />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+
+        {/* Profile */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Protected Routes - Company */}
         <Route

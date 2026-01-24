@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle, VehicleFormData } from "../types/vehicle";
+import Header from "../components/Header";
+import { COLORS } from "../constants/colors";
 
 const CompanyDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +18,7 @@ const CompanyDashboard: React.FC = () => {
 
   const [formData, setFormData] = useState<VehicleFormData>({
     vehicleNumber: "",
-    vehicleType: "택시",
+    vehicleType: "화물차",
     tonnage: "",
     yearModel: undefined,
     region: "서울",
@@ -26,7 +28,7 @@ const CompanyDashboard: React.FC = () => {
   });
 
   const regions = ["서울", "경기", "강원", "충청", "전라", "경상"];
-  const vehicleTypes = ["택시", "화물차", "버스", "기타"];
+  const vehicleTypes = ["화물차"];
 
   useEffect(() => {
     loadMyVehicles();
@@ -99,7 +101,7 @@ const CompanyDashboard: React.FC = () => {
   const resetForm = () => {
     setFormData({
       vehicleNumber: "",
-      vehicleType: "택시",
+      vehicleType: "화물차",
       tonnage: "",
       yearModel: undefined,
       region: "서울",
@@ -111,39 +113,18 @@ const CompanyDashboard: React.FC = () => {
     setShowAddForm(false);
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/");
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">회사 대시보드</h1>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-600">
-                {(user as any)?.companyName}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900"
-              >
-                로그아웃
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
+      <Header title="회사 대시보드" />
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Add Vehicle Button */}
         <div className="mb-6">
           <button
             onClick={() => setShowAddForm(!showAddForm)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
+            className="px-6 py-3 text-white rounded-lg font-semibold transition"
+            style={{ backgroundColor: COLORS.navy.primary }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.hover)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.primary)}
           >
             {showAddForm ? "취소" : "+ 차량 등록"}
           </button>
@@ -305,7 +286,10 @@ const CompanyDashboard: React.FC = () => {
               <div className="md:col-span-2 flex gap-2">
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="px-6 py-2 text-white rounded-md transition"
+                  style={{ backgroundColor: COLORS.navy.primary }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.hover)}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.primary)}
                 >
                   {editingVehicle ? "수정" : "등록"}
                 </button>
@@ -329,7 +313,10 @@ const CompanyDashboard: React.FC = () => {
 
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+              <div 
+                className="inline-block animate-spin rounded-full h-12 w-12 border-b-2"
+                style={{ borderColor: COLORS.navy.primary }}
+              ></div>
             </div>
           ) : vehicles.length === 0 ? (
             <div className="bg-white rounded-lg shadow-md p-12 text-center">
@@ -381,7 +368,10 @@ const CompanyDashboard: React.FC = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(vehicle)}
-                      className="flex-1 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                      className="flex-1 py-2 text-white rounded-md text-sm transition"
+                      style={{ backgroundColor: COLORS.navy.primary }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.hover)}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = COLORS.navy.primary)}
                     >
                       수정
                     </button>

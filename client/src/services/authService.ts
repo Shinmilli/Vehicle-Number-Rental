@@ -8,7 +8,6 @@ export const authService = {
     businessNumber: string;
     companyName: string;
     representative: string;
-    address: string;
     contactPerson: string;
     phone: string;
     email?: string;
@@ -22,6 +21,7 @@ export const authService = {
   registerUser: async (data: {
     name: string;
     phone: string;
+    email: string;
     password: string;
   }): Promise<AuthResponse> => {
     const response = await api.post("/auth/register/user", data);
@@ -39,16 +39,57 @@ export const authService = {
   },
 
   // 사업자번호 인증
-  verifyBusinessNumber: async (businessNumber: string): Promise<boolean> => {
+  verifyBusinessNumber: async (businessNumber: string): Promise<{ valid: boolean; message: string }> => {
     const response = await api.post("/auth/verify-business", {
       businessNumber,
     });
-    return response.data.valid;
+    return {
+      valid: response.data.valid,
+      message: response.data.message || (response.data.valid ? "인증이 완료되었습니다." : "인증에 실패했습니다."),
+    };
   },
 
   // 현재 사용자 정보
   getCurrentUser: async (): Promise<AuthResponse> => {
     const response = await api.get("/auth/me");
     return response.data;
+  },
+
+  // 개인 프로필 수정
+  updateUserProfile: async (data: {
+    name?: string;
+    phone?: string;
+    email?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }): Promise<AuthResponse> => {
+    const response = await api.put("/auth/profile", data);
+    return response.data;
+  },
+
+  // 회사 프로필 조회/수정
+  getCompanyProfile: async () => {
+    const response = await api.get("/companies/profile");
+    return response.data;
+  },
+
+  updateCompanyProfile: async (data: {
+    companyName?: string;
+    representative?: string;
+    address?: string;
+    contactPerson?: string;
+    phone?: string;
+    email?: string;
+    contactPhone?: string;
+    currentPassword?: string;
+    newPassword?: string;
+  }) => {
+    const response = await api.put("/companies/profile", data);
+    return response.data;
+  },
+
+  // 연락받을 번호 업데이트 (회사)
+  updateContactPhone: async (contactPhone: string): Promise<void> => {
+    await api.put("/companies/contact-phone", { contactPhone });
   },
 };

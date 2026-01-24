@@ -18,6 +18,7 @@ model Company {
   address           String
   contactPerson     String    @map("contact_person")
   phone             String
+  contactPhone      String?   @map("contact_phone") // 기사들이 연락받을 번호
   email             String?
   password          String    // 해시된 비밀번호
   verified          Boolean   @default(false)
@@ -36,6 +37,7 @@ model User {
   id            String    @id @default(uuid())
   name          String
   phone         String    @unique
+  email         String?   @unique // 이메일 (SMS 인증 대신 사용)
   password      String    // 해시된 비밀번호
   verified      Boolean   @default(false)
   verifiedAt    DateTime? @map("verified_at")

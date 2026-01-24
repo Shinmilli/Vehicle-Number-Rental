@@ -22,11 +22,11 @@ router.get("/", getVehicles);
 router.get("/stats/region", getRegionStats);
 router.get("/stats/type", getVehicleTypeStats);
 
+// 인증 필요 엔드포인트 (구체적인 경로는 동적 라우트보다 먼저 정의)
+router.get("/my", authMiddleware, getMyVehicles);
+
 // 선택적 인증 엔드포인트 (로그인한 사용자는 추가 정보 제공)
 router.get("/:id", optionalAuthMiddleware, getVehicle);
-
-// 인증 필요 엔드포인트
-router.get("/my", authMiddleware, getMyVehicles);
 router.post("/", authMiddleware, createVehicle);
 router.put("/:id", authMiddleware, updateVehicle);
 router.delete("/:id", authMiddleware, deleteVehicle);

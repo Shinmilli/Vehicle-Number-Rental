@@ -1,6 +1,7 @@
 {
   "short_name": "차량번호 중개",
   "name": "영업용 차량 번호 임대 중개 플랫폼",
+  "description": "영업용 차량 번호 임대를 위한 중개 플랫폼",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,31 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "background_color": "#ffffff",
+  "categories": ["business", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "차량 검색",
+      "short_name": "검색",
+      "description": "차량 번호 검색하기",
+      "url": "/",
+      "icons": [{ "src": "logo192.png", "sizes": "192x192" }]
+    }
+  ]
 }
