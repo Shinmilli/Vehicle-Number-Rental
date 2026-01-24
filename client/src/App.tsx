@@ -14,6 +14,9 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailPage from "./pages/PaymentFailPage";
 import ProfilePage from "./pages/ProfilePage";
 
+// Components
+import InstallPrompt from "./components/InstallPrompt";
+
 // Protected Route Component
 const ProtectedRoute: React.FC<{
   children: React.ReactNode;
@@ -42,6 +45,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <InstallPrompt />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />

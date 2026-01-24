@@ -2,29 +2,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../stores/authStore";
-import { vehicleService } from "../services/vehicleService";
-import { Vehicle } from "../types/vehicle";
 import Header from "../components/Header";
 import { COLORS } from "../constants/colors";
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, userType } = useAuthStore();
-  const [vehicleStats, setVehicleStats] = useState({
-    seoul: 0,
-    gyeonggi: 0,
-    gangwon: 0,
-    chungcheong: 0,
-    jeolla: 0,
-    gyeongsang: 0,
-  });
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
-    // 지역별 차량 수 통계 로드 (로그인 없이도 표시)
-    loadVehicleStats();
-
     // Intersection Observer for scroll animations
     const observerOptions = {
       threshold: 0.1,
@@ -43,49 +30,17 @@ const HomePage: React.FC = () => {
     }, observerOptions);
 
     // Observe all sections
-    Object.values(sectionRefs.current).forEach((ref) => {
+    const currentRefs = sectionRefs.current;
+    Object.values(currentRefs).forEach((ref) => {
       if (ref) observer.observe(ref);
     });
 
     return () => {
-      Object.values(sectionRefs.current).forEach((ref) => {
+      Object.values(currentRefs).forEach((ref) => {
         if (ref) observer.unobserve(ref);
       });
     };
   }, []);
-
-  const loadVehicleStats = async () => {
-    try {
-      // 실제로는 백엔드에서 통계 API를 만들어야 함
-      // 여기서는 임시로 하드코딩
-      setVehicleStats({
-        seoul: 145,
-        gyeonggi: 230,
-        gangwon: 67,
-        chungcheong: 89,
-        jeolla: 102,
-        gyeongsang: 156,
-      });
-    } catch (error) {
-      console.error("Failed to load stats:", error);
-    }
-  };
-
-  const handleRegionClick = (region: string) => {
-    if (!isAuthenticated) {
-      // 로그인 필요 알림
-      window.alert("로그인이 필요한 서비스입니다.");
-      navigate("/login");
-      return;
-    }
-
-    // 로그인된 경우 해당 지역 차량 목록으로 이동
-    if (userType === "user") {
-      navigate(`/driver/dashboard?region=${region}`);
-    } else {
-      navigate("/company/dashboard");
-    }
-  };
 
   const handleGetStarted = () => {
     if (isAuthenticated) {

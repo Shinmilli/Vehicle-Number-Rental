@@ -9,7 +9,7 @@ import { COLORS } from "../constants/colors";
 
 const CompanyDashboard: React.FC = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { logout } = useAuthStore();
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -111,11 +111,6 @@ const CompanyDashboard: React.FC = () => {
     });
     setEditingVehicle(null);
     setShowAddForm(false);
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/");
   };
 
   return (

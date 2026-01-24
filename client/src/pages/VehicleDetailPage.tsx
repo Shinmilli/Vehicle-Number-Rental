@@ -1,5 +1,5 @@
 // src/pages/VehicleDetailPage.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle } from "../types/vehicle";
@@ -13,13 +13,7 @@ const VehicleDetailPage: React.FC = () => {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (id) {
-      loadVehicle(id);
-    }
-  }, [id]);
-
-  const loadVehicle = async (vehicleId: string) => {
+  const loadVehicle = useCallback(async (vehicleId: string) => {
     setIsLoading(true);
     try {
       const data = await vehicleService.getVehicle(vehicleId);
@@ -31,7 +25,13 @@ const VehicleDetailPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    if (id) {
+      loadVehicle(id);
+    }
+  }, [id, loadVehicle]);
 
   if (isLoading) {
     return (
