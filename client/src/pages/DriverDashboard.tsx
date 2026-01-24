@@ -176,7 +176,7 @@ const DriverDashboard: React.FC = () => {
                       handleVehicleClick(vehicle.id);
                     }}
                   >
-                    상세보기 (10,000원)
+                    상세보기
                   </button>
                 </div>
               ))}

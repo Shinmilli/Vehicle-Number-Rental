@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { vehicleService } from "../services/vehicleService";
-import { paymentService } from "../services/paymentService";
 import { Vehicle } from "../types/vehicle";
 import Header from "../components/Header";
 
@@ -12,19 +11,10 @@ const VehicleDetailPage: React.FC = () => {
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasPaid, setHasPaid] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [contactInfo, setContactInfo] = useState<{
-    companyName: string;
-    contactPerson: string;
-    contactPhone?: string;
-    phone: string;
-  } | null>(null);
 
   useEffect(() => {
     if (id) {
       loadVehicle(id);
-      checkPaymentStatus(id);
     }
   }, [id]);
 
@@ -39,74 +29,6 @@ const VehicleDetailPage: React.FC = () => {
       navigate(-1);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const checkPaymentStatus = async (vehicleId: string) => {
-    try {
-      // 이미 결제한 차량인지 확인
-      const payments = await paymentService.getMyPayments();
-      const paid = payments.some(
-        (p) => p.vehicleId === vehicleId && p.status === "completed"
-      );
-      setHasPaid(paid);
-      
-      // 결제가 완료된 경우 연락처 정보 가져오기
-      if (paid) {
-        try {
-          const contactData = await paymentService.getContactAfterPayment(vehicleId);
-          if (contactData.company) {
-            setContactInfo({
-              companyName: contactData.company.companyName || "",
-              contactPerson: contactData.company.contactPerson || "",
-              contactPhone: contactData.company.contactPhone || undefined,
-              phone: contactData.company.phone || "",
-            });
-          }
-        } catch (error) {
-          console.error("Failed to load contact info:", error);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to check payment:", error);
-    }
-  };
-
-  const handlePayment = async () => {
-    if (!vehicle || !id) return;
-
-    setIsProcessing(true);
-
-    try {
-      // 토스페이먼츠 결제 초기화
-      const payment = await paymentService.createPayment({
-        vehicleId: id,
-        amount: 10000,
-      });
-
-      // 토스페이먼츠 SDK 호출 (실제 구현 시)
-      // 여기서는 간단히 완료 처리
-      window.alert("결제가 완료되었습니다!");
-      setHasPaid(true);
-      
-      // 결제 완료 후 연락처 정보 가져오기
-      try {
-        const contactData = await paymentService.getContactAfterPayment(id);
-        if (contactData.company) {
-          setContactInfo({
-            companyName: contactData.company.companyName || "",
-            contactPerson: contactData.company.contactPerson || "",
-            contactPhone: contactData.company.contactPhone || undefined,
-            phone: contactData.company.phone || "",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to load contact info:", error);
-      }
-    } catch (error: any) {
-      window.alert(error.response?.data?.message || "결제에 실패했습니다.");
-    } finally {
-      setIsProcessing(false);
     }
   };
 
@@ -197,74 +119,38 @@ const VehicleDetailPage: React.FC = () => {
               </div>
             )}
 
-            {/* Contact Information (Locked) */}
+            {/* Contact Information */}
             <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">연락처 정보</h3>
 
-              {hasPaid ? (
-                <div className="space-y-3 bg-green-50 p-4 rounded-lg">
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">회사명</span>
-                    <span className="font-semibold">
-                      {contactInfo?.companyName || vehicle.company?.companyName || "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">담당자</span>
-                    <span className="font-semibold">
-                      {contactInfo?.contactPerson || vehicle.company?.contactPerson || "-"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-700">전화번호</span>
-                    <a
-                      href={`tel:${contactInfo?.contactPhone || contactInfo?.phone || vehicle.company?.phone || ""}`}
-                      className="font-semibold text-blue-600 hover:underline"
-                    >
-                      {contactInfo?.contactPhone || contactInfo?.phone || vehicle.company?.phone || "-"}
-                    </a>
-                  </div>
-                  <div className="mt-4 pt-4 border-t">
-                    <p className="text-sm text-gray-600">
-                      💡 위 번호로 직접 연락하여 상담하실 수 있습니다.
-                    </p>
-                  </div>
+              <div className="space-y-3 bg-green-50 p-4 rounded-lg">
+                <div className="flex justify-between">
+                  <span className="text-gray-700">회사명</span>
+                  <span className="font-semibold">
+                    {vehicle.company?.companyName || "-"}
+                  </span>
                 </div>
-              ) : (
-                <div className="bg-gray-100 p-6 rounded-lg text-center">
-                  <div className="mb-4">
-                    <svg
-                      className="mx-auto h-12 w-12 text-gray-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
-                  </div>
-                  <p className="text-gray-700 mb-4">
-                    연락처 정보를 확인하려면 <strong>10,000원</strong>을
-                    결제해주세요.
-                  </p>
-                  <button
-                    onClick={handlePayment}
-                    disabled={isProcessing}
-                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50"
+                <div className="flex justify-between">
+                  <span className="text-gray-700">담당자</span>
+                  <span className="font-semibold">
+                    {vehicle.company?.contactPerson || "-"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-700">전화번호</span>
+                  <a
+                    href={`tel:${vehicle.company?.contactPhone || vehicle.company?.phone || ""}`}
+                    className="font-semibold text-blue-600 hover:underline"
                   >
-                    {isProcessing
-                      ? "처리 중..."
-                      : "10,000원 결제하고 연락처 보기"}
-                  </button>
-                  <p className="text-xs text-gray-500 mt-3">
-                    결제 후 즉시 연락처가 공개됩니다.
+                    {vehicle.company?.contactPhone || vehicle.company?.phone || "-"}
+                  </a>
+                </div>
+                <div className="mt-4 pt-4 border-t">
+                  <p className="text-sm text-gray-600">
+                    💡 위 번호로 직접 연락하여 상담하실 수 있습니다.
                   </p>
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </div>

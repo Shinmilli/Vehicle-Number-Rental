@@ -25,6 +25,9 @@ export class VehicleRepository {
             company: {
               select: {
                 companyName: true,
+                contactPerson: true,
+                phone: true,
+                contactPhone: true,
               },
             },
           }
