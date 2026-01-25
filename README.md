@@ -14,7 +14,7 @@
 - **결제 시스템**: 1만원 고정 결제 후 연락처 공개
 - **연락처 공개**: 결제 완료 후 회사 연락처 확인 가능
 
-### 기술 스택
+### 기술 스택 
 
 - **Backend**: Node.js + Express + TypeScript
 - **Database**: PostgreSQL + Prisma ORM
