@@ -24,7 +24,6 @@ const LoginPage: React.FC = () => {
 
   const [userType, setUserType] = useState<"user" | "company">("user");
   const [loginIdentifier, setLoginIdentifier] = useState(""); // 전화번호 또는 이메일
-  const [isEmail, setIsEmail] = useState(false); // 이메일인지 전화번호인지
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,11 +38,6 @@ const LoginPage: React.FC = () => {
       navigate("/login", { replace: true });
     }
   }, [searchParams, navigate]);
-
-  // 전화번호 정규화 함수 (하이픈 제거)
-  const normalizePhone = (phoneNumber: string): string => {
-    return phoneNumber.replace(/-/g, "");
-  };
 
   // 전화번호 포맷팅 함수 (하이픈 자동 추가)
   const formatPhone = (phoneNumber: string): string => {
@@ -76,7 +70,6 @@ const LoginPage: React.FC = () => {
     try {
       // 입력값이 이메일인지 전화번호인지 확인
       const isEmailInput = checkIfEmail(loginIdentifier);
-      setIsEmail(isEmailInput);
 
       // 기본 회사 ID 가져오기 (회사 로그인인 경우)
       const defaultCompanyId = userType === "company" ? getDefaultCompanyId() : undefined;
