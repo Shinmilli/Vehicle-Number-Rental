@@ -13,6 +13,16 @@ const OAuthCallbackPage: React.FC = () => {
     const token = searchParams.get("token");
     const userType = searchParams.get("userType");
     const userParam = searchParams.get("user");
+    const error = searchParams.get("error");
+
+    // 에러가 있으면 로그인 페이지로 리다이렉트
+    if (error) {
+      console.error("OAuth callback error:", error);
+      navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
+      return;
+    }
+
+    console.log("OAuth callback - Params:", { token: token ? "present" : "missing", userType, userParam: userParam ? "present" : "missing" });
 
     if (token && userType) {
       try {
@@ -33,16 +43,19 @@ const OAuthCallbackPage: React.FC = () => {
             );
 
             // 대시보드로 이동
+            console.log("OAuth callback - Success, redirecting to dashboard");
             if (userType === "company") {
-              navigate("/company/dashboard");
+              navigate("/company/dashboard", { replace: true });
             } else {
-              navigate("/driver/dashboard");
+              navigate("/driver/dashboard", { replace: true });
             }
             return;
           } catch (parseError) {
             console.error("Failed to parse user data:", parseError);
             console.error("Raw user param:", userParam);
-            throw parseError;
+            console.error("Raw user param length:", userParam?.length);
+            navigate("/login?error=사용자 정보를 파싱하는 중 오류가 발생했습니다.", { replace: true });
+            return;
           }
         }
 
@@ -61,24 +74,32 @@ const OAuthCallbackPage: React.FC = () => {
             );
 
             // 대시보드로 이동
+            console.log("OAuth callback - Success (API fallback), redirecting to dashboard");
             if (userType === "company") {
-              navigate("/company/dashboard");
+              navigate("/company/dashboard", { replace: true });
             } else {
-              navigate("/driver/dashboard");
+              navigate("/driver/dashboard", { replace: true });
             }
           })
           .catch((error) => {
             console.error("OAuth callback error:", error);
+            console.error("OAuth callback error details:", {
+              message: error instanceof Error ? error.message : String(error),
+              response: (error as any)?.response?.data,
+            });
             localStorage.removeItem("token");
             localStorage.removeItem("userType");
-            navigate("/login?error=로그인 처리 중 오류가 발생했습니다.");
+            const errorMsg = error instanceof Error ? error.message : "로그인 처리 중 오류가 발생했습니다.";
+            navigate(`/login?error=${encodeURIComponent(errorMsg)}`, { replace: true });
           });
       } catch (error) {
         console.error("OAuth callback parsing error:", error);
-        navigate("/login?error=사용자 정보 처리 중 오류가 발생했습니다.");
+        navigate("/login?error=사용자 정보 처리 중 오류가 발생했습니다.", { replace: true });
       }
     } else {
-      navigate("/login?error=인증에 실패했습니다.");
+      console.error("OAuth callback - Missing required params:", { token: !!token, userType: !!userType });
+      console.error("OAuth callback - All params:", Object.fromEntries(searchParams.entries()));
+      navigate("/login?error=인증에 실패했습니다. 토큰 또는 사용자 정보가 없습니다.", { replace: true });
     }
   }, [searchParams, navigate, setAuth]);
 

@@ -34,12 +34,30 @@ const KakaoCallbackPage: React.FC = () => {
       
       // 서버의 카카오 콜백 API 호출
       // 인증 코드는 매번 새로 생성되며, 일회용이므로 즉시 서버로 전달
-      const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3001/api";
+      // 배포 환경에서 API URL 자동 감지
+      let API_BASE_URL = process.env.REACT_APP_API_URL;
+      
+      // 환경 변수가 없으면 현재 도메인 기반으로 추정
+      if (!API_BASE_URL) {
+        const isProduction = window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1";
+        if (isProduction) {
+          // 배포 환경: 서버가 별도 도메인에 있다면 환경 변수 필수
+          // 같은 도메인이라면 /api 사용 가능
+          console.error("REACT_APP_API_URL이 설정되지 않았습니다. 배포 환경 변수를 확인하세요.");
+          hasProcessed.current = true;
+          navigate("/login?error=서버 설정 오류가 발생했습니다. 관리자에게 문의하세요.");
+          return;
+        } else {
+          // 개발 환경
+          API_BASE_URL = "http://localhost:3001/api";
+        }
+      }
+      
       const callbackUrl = `${API_BASE_URL}/auth/oauth/kakao/callback?code=${encodeURIComponent(code)}${state ? `&state=${encodeURIComponent(state)}` : ''}`;
       
       console.log("Kakao callback - Code received:", code);
       console.log("Kakao callback - Redirecting to server:", callbackUrl);
-      console.log("Kakao callback - Expected redirect URI:", "http://localhost:3000/oauth/kakao/callback");
+      console.log("Kakao callback - API Base URL:", API_BASE_URL);
       
       // 즉시 서버로 리다이렉트 (인증 코드는 매번 새로 생성되므로 문제없음)
       window.location.href = callbackUrl;

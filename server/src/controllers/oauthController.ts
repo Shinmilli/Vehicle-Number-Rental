@@ -12,25 +12,35 @@ export const getKakaoAuthUrl = (req: Request, res: Response) => {
   const KAKAO_REDIRECT_URI = process.env.KAKAO_REDIRECT_URI;
 
   if (!KAKAO_CLIENT_ID) {
+    logger.error("Kakao CLIENT_ID not set");
     return res.status(500).json({ message: "카카오 클라이언트 ID가 설정되지 않았습니다." });
   }
 
   if (!KAKAO_REDIRECT_URI) {
+    logger.error("Kakao REDIRECT_URI not set");
     return res.status(500).json({ message: "카카오 Redirect URI가 설정되지 않았습니다." });
   }
 
-  // Redirect URI 정규화 (공백 제거)
-  const redirectUri = KAKAO_REDIRECT_URI.trim();
+  // Redirect URI 정규화
+  // 카카오는 Redirect URI를 매우 엄격하게 검증하므로 정확히 일치해야 함
+  let redirectUri = KAKAO_REDIRECT_URI.trim();
+  
+  // 마지막 슬래시 제거 (일관성을 위해)
+  // 단, 카카오 콘솔에 등록된 URI와 정확히 일치해야 하므로 주의 필요
+  // redirectUri = redirectUri.replace(/\/$/, "");
   
   // 카카오 인증 URL 생성
   // redirect_uri는 카카오 콘솔에 등록된 것과 정확히 일치해야 함
-  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code`;
+  const encodedRedirectUri = encodeURIComponent(redirectUri);
+  const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${KAKAO_CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code`;
 
   logger.info("Kakao auth URL generated", {
     redirect_uri: redirectUri,
-    redirect_uri_encoded: encodeURIComponent(redirectUri),
+    redirect_uri_encoded: encodedRedirectUri,
     redirect_uri_length: redirectUri.length,
-    client_id: KAKAO_CLIENT_ID ? "set" : "not set",
+    redirect_uri_ends_with_slash: redirectUri.endsWith("/"),
+    client_id: KAKAO_CLIENT_ID.substring(0, 8) + "...", // 보안을 위해 일부만 로깅
+    client_id_length: KAKAO_CLIENT_ID.length,
     full_auth_url: kakaoAuthUrl,
   });
 
@@ -63,6 +73,10 @@ export const kakaoCallback = async (req: Request, res: Response) => {
     // 카카오는 쿼리 파라미터를 제외한 base URL만 비교하므로, 정확히 일치해야 함
     const redirectUri = KAKAO_REDIRECT_URI.trim(); // 공백 제거
     
+    // 실제 요청이 온 URL에서 redirect_uri 추출 (디버깅용)
+    const requestOrigin = req.get('referer') || req.get('origin') || '';
+    const actualCallbackUrl = requestOrigin ? new URL(requestOrigin).origin + '/oauth/kakao/callback' : 'unknown';
+    
     logger.info("Kakao token request", {
       redirect_uri: redirectUri,
       redirect_uri_length: redirectUri.length,
@@ -70,6 +84,9 @@ export const kakaoCallback = async (req: Request, res: Response) => {
       client_id: KAKAO_CLIENT_ID ? "set" : "not set",
       request_url: req.url,
       request_headers: req.headers.host,
+      request_referer: req.get('referer'),
+      actual_callback_url: actualCallbackUrl,
+      redirect_uri_match: redirectUri === actualCallbackUrl ? "match" : "mismatch",
     });
 
     let tokenResponse;
@@ -102,18 +119,27 @@ export const kakaoCallback = async (req: Request, res: Response) => {
       const errorMsg = errorData?.error_description || errorData?.error || "카카오 토큰 요청에 실패했습니다.";
       
       // Redirect URI 불일치 에러인 경우 더 자세한 메시지
-      if (errorData?.error === "invalid_grant" || errorMsg.includes("authorization code") || errorMsg.includes("not found")) {
+      if (errorData?.error === "invalid_grant" || errorMsg.includes("authorization code") || errorMsg.includes("not found") || errorMsg.includes("redirect_uri")) {
         // 실제 카카오 에러 메시지 확인
         const kakaoErrorMsg = errorData?.error_description || errorMsg;
+        const requestOrigin = req.get('referer') || req.get('origin') || '';
+        const actualCallbackUrl = requestOrigin ? new URL(requestOrigin).origin + '/oauth/kakao/callback' : 'unknown';
+        
         logger.error("Kakao invalid_grant error details", new Error(kakaoErrorMsg), {
           kakao_error: errorData?.error,
           kakao_error_description: errorData?.error_description,
           redirect_uri_used: redirectUri,
           redirect_uri_from_env: KAKAO_REDIRECT_URI,
+          actual_callback_url: actualCallbackUrl,
+          redirect_uri_match: redirectUri === actualCallbackUrl ? "match" : "mismatch",
           code_preview: code && typeof code === 'string' ? `${code.substring(0, 20)}...` : "no code",
+          request_referer: req.get('referer'),
+          request_origin: req.get('origin'),
         });
         
-        return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(`카카오 인증 실패: ${kakaoErrorMsg}. 사용된 Redirect URI: ${redirectUri}. 카카오 콘솔의 Redirect URI와 정확히 일치하는지 확인하세요.`)}`);
+        const errorDetail = `카카오 인증 실패: ${kakaoErrorMsg}\n\n사용된 Redirect URI: ${redirectUri}\n실제 콜백 URL: ${actualCallbackUrl}\n\n카카오 개발자 콘솔(https://developers.kakao.com)에서 Redirect URI가 정확히 일치하는지 확인하세요.\n배포 환경: ${actualCallbackUrl}\n개발 환경: http://localhost:3000/oauth/kakao/callback`;
+        
+        return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(errorDetail)}`);
       }
       
       return res.redirect(`${frontendUrl}/login?error=${encodeURIComponent(errorMsg)}`);
@@ -158,14 +184,32 @@ export const getGoogleAuthUrl = (req: Request, res: Response) => {
   const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 
   if (!GOOGLE_CLIENT_ID) {
+    logger.error("Google CLIENT_ID not set");
     return res.status(500).json({ message: "구글 클라이언트 ID가 설정되지 않았습니다." });
   }
 
   if (!GOOGLE_REDIRECT_URI) {
+    logger.error("Google REDIRECT_URI not set");
     return res.status(500).json({ message: "구글 Redirect URI가 설정되지 않았습니다." });
   }
 
-  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(GOOGLE_REDIRECT_URI)}&response_type=code&scope=email profile`;
+  // Redirect URI 정규화
+  const redirectUri = GOOGLE_REDIRECT_URI.trim();
+  const encodedRedirectUri = encodeURIComponent(redirectUri);
+  
+  // 구글 인증 URL 생성
+  // redirect_uri는 구글 콘솔에 등록된 것과 정확히 일치해야 함
+  const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${GOOGLE_CLIENT_ID}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=email profile`;
+
+  logger.info("Google auth URL generated", {
+    redirect_uri: redirectUri,
+    redirect_uri_encoded: encodedRedirectUri,
+    redirect_uri_length: redirectUri.length,
+    redirect_uri_ends_with_slash: redirectUri.endsWith("/"),
+    client_id: GOOGLE_CLIENT_ID.substring(0, 20) + "...", // 보안을 위해 일부만 로깅
+    client_id_length: GOOGLE_CLIENT_ID.length,
+    full_auth_url: googleAuthUrl,
+  });
 
   res.json({ authUrl: googleAuthUrl });
 };
