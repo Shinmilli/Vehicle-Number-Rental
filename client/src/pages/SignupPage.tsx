@@ -399,9 +399,15 @@ const SignupPage: React.FC = () => {
                 onClick={async () => {
                   try {
                     const authUrl = await authService.getKakaoAuthUrl();
+                    if (!authUrl) {
+                      setError("카카오 인증 URL을 받을 수 없습니다.");
+                      return;
+                    }
                     window.location.href = authUrl;
-                  } catch (error) {
-                    setError("카카오 로그인을 시작할 수 없습니다.");
+                  } catch (error: any) {
+                    console.error("Kakao OAuth error:", error);
+                    const errorMessage = error?.response?.data?.message || error?.message || "카카오 로그인을 시작할 수 없습니다.";
+                    setError(errorMessage);
                   }
                 }}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-medium transition"
@@ -417,9 +423,15 @@ const SignupPage: React.FC = () => {
                 onClick={async () => {
                   try {
                     const authUrl = await authService.getGoogleAuthUrl();
+                    if (!authUrl) {
+                      setError("구글 인증 URL을 받을 수 없습니다.");
+                      return;
+                    }
                     window.location.href = authUrl;
-                  } catch (error) {
-                    setError("구글 로그인을 시작할 수 없습니다.");
+                  } catch (error: any) {
+                    console.error("Google OAuth error:", error);
+                    const errorMessage = error?.response?.data?.message || error?.message || "구글 로그인을 시작할 수 없습니다.";
+                    setError(errorMessage);
                   }
                 }}
                 className="w-full flex items-center justify-center gap-3 py-3 px-4 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-gray-900 font-medium transition"
