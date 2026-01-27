@@ -28,14 +28,46 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showErrorDetails, setShowErrorDetails] = useState(false);
+  const [errorDetails, setErrorDetails] = useState<any>(null);
 
-  // URL 파라미터에서 에러 메시지 확인
+  // URL 파라미터에서 에러 메시지 확인 및 localStorage에서 에러 정보 확인
   useEffect(() => {
     const errorParam = searchParams.get("error");
     if (errorParam) {
       setError(errorParam);
       // URL에서 error 파라미터 제거
       navigate("/login", { replace: true });
+    }
+    
+    // localStorage에서 OAuth 에러 정보 확인
+    const oauthErrorInfo = localStorage.getItem("oauth_error_info");
+    const oauthDebugInfo = localStorage.getItem("oauth_debug_info");
+    
+    if (oauthErrorInfo) {
+      try {
+        const errorData = JSON.parse(oauthErrorInfo);
+        console.error("OAuth Error Info (from localStorage):", errorData);
+        
+        // 에러 상세 정보 저장
+        setErrorDetails({
+          error: errorData,
+          debug: oauthDebugInfo ? JSON.parse(oauthDebugInfo) : null,
+        });
+        
+        // 에러 메시지가 없으면 저장된 에러 정보 사용
+        if (!errorParam) {
+          setError(errorData.error || "OAuth 로그인 중 오류가 발생했습니다.");
+        }
+        
+        // 디버깅 정보도 함께 로그
+        if (oauthDebugInfo) {
+          const debugData = JSON.parse(oauthDebugInfo);
+          console.log("OAuth Debug Info (from localStorage):", debugData);
+        }
+      } catch (e) {
+        console.error("Failed to parse OAuth error info:", e);
+      }
     }
   }, [searchParams, navigate]);
 
@@ -65,6 +97,11 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setErrorDetails(null);
+    setShowErrorDetails(false);
+    // 이전 OAuth 에러 정보 정리
+    localStorage.removeItem("oauth_error_info");
+    localStorage.removeItem("oauth_debug_info");
     setIsLoading(true);
 
     try {
@@ -177,7 +214,29 @@ const LoginPage: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-              {error}
+              <div className="whitespace-pre-wrap">{error}</div>
+              {errorDetails && (
+                <div className="mt-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowErrorDetails(!showErrorDetails);
+                      // 상세 정보를 콘솔에도 출력
+                      console.error("OAuth Error Details:", errorDetails);
+                    }}
+                    className="text-sm text-red-700 underline hover:text-red-900"
+                  >
+                    {showErrorDetails ? "상세 정보 숨기기" : "상세 정보 보기 (콘솔에도 출력됨)"}
+                  </button>
+                  {showErrorDetails && (
+                    <div className="mt-2 p-3 bg-red-100 rounded text-xs font-mono overflow-auto max-h-60">
+                      <pre className="whitespace-pre-wrap text-red-800">
+                        {JSON.stringify(errorDetails, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -319,6 +378,12 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={async () => {
+                // 이전 OAuth 에러 정보 정리
+                localStorage.removeItem("oauth_error_info");
+                localStorage.removeItem("oauth_debug_info");
+                setError("");
+                setErrorDetails(null);
+                
                 try {
                   const authUrl = await authService.getKakaoAuthUrl();
                   if (!authUrl) {
@@ -343,6 +408,12 @@ const LoginPage: React.FC = () => {
             <button
               type="button"
               onClick={async () => {
+                // 이전 OAuth 에러 정보 정리
+                localStorage.removeItem("oauth_error_info");
+                localStorage.removeItem("oauth_debug_info");
+                setError("");
+                setErrorDetails(null);
+                
                 try {
                   const authUrl = await authService.getGoogleAuthUrl();
                   if (!authUrl) {
