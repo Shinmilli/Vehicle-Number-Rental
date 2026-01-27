@@ -18,6 +18,22 @@ const OAuthCallbackPage: React.FC = () => {
     // 에러가 있으면 로그인 페이지로 리다이렉트
     if (error) {
       console.error("OAuth callback error:", error);
+      
+      // 에러 정보 저장
+      const errorInfo = {
+        timestamp: new Date().toISOString(),
+        provider: "unknown",
+        error: decodeURIComponent(error),
+        details: {
+          token: token ? "present" : "missing",
+          userType,
+          userParam: userParam ? "present" : "missing",
+          allParams: Object.fromEntries(searchParams.entries()),
+          url: window.location.href,
+        },
+      };
+      localStorage.setItem("oauth_error_info", JSON.stringify(errorInfo));
+      
       navigate(`/login?error=${encodeURIComponent(error)}`, { replace: true });
       return;
     }
@@ -54,6 +70,23 @@ const OAuthCallbackPage: React.FC = () => {
             console.error("Failed to parse user data:", parseError);
             console.error("Raw user param:", userParam);
             console.error("Raw user param length:", userParam?.length);
+            
+            // 에러 정보 저장
+            const errorInfo = {
+              timestamp: new Date().toISOString(),
+              provider: "oauth",
+              error: "사용자 정보를 파싱하는 중 오류가 발생했습니다.",
+              details: {
+                parseError: parseError instanceof Error ? parseError.message : String(parseError),
+                rawUserParam: userParam,
+                userParamLength: userParam?.length,
+                token: token ? "present" : "missing",
+                userType,
+                url: window.location.href,
+              },
+            };
+            localStorage.setItem("oauth_error_info", JSON.stringify(errorInfo));
+            
             navigate("/login?error=사용자 정보를 파싱하는 중 오류가 발생했습니다.", { replace: true });
             return;
           }
@@ -87,6 +120,23 @@ const OAuthCallbackPage: React.FC = () => {
               message: error instanceof Error ? error.message : String(error),
               response: (error as any)?.response?.data,
             });
+            
+            // 에러 정보 저장
+            const errorInfo = {
+              timestamp: new Date().toISOString(),
+              provider: "oauth",
+              error: error instanceof Error ? error.message : "로그인 처리 중 오류가 발생했습니다.",
+              details: {
+                errorMessage: error instanceof Error ? error.message : String(error),
+                errorResponse: (error as any)?.response?.data,
+                errorStatus: (error as any)?.response?.status,
+                token: token ? "present" : "missing",
+                userType,
+                url: window.location.href,
+              },
+            };
+            localStorage.setItem("oauth_error_info", JSON.stringify(errorInfo));
+            
             localStorage.removeItem("token");
             localStorage.removeItem("userType");
             const errorMsg = error instanceof Error ? error.message : "로그인 처리 중 오류가 발생했습니다.";
@@ -94,11 +144,41 @@ const OAuthCallbackPage: React.FC = () => {
           });
       } catch (error) {
         console.error("OAuth callback parsing error:", error);
+        
+        // 에러 정보 저장
+        const errorInfo = {
+          timestamp: new Date().toISOString(),
+          provider: "oauth",
+          error: "사용자 정보 처리 중 오류가 발생했습니다.",
+          details: {
+            parseError: error instanceof Error ? error.message : String(error),
+            token: token ? "present" : "missing",
+            userType,
+            url: window.location.href,
+          },
+        };
+        localStorage.setItem("oauth_error_info", JSON.stringify(errorInfo));
+        
         navigate("/login?error=사용자 정보 처리 중 오류가 발생했습니다.", { replace: true });
       }
     } else {
       console.error("OAuth callback - Missing required params:", { token: !!token, userType: !!userType });
       console.error("OAuth callback - All params:", Object.fromEntries(searchParams.entries()));
+      
+      // 에러 정보 저장
+      const errorInfo = {
+        timestamp: new Date().toISOString(),
+        provider: "oauth",
+        error: "인증에 실패했습니다. 토큰 또는 사용자 정보가 없습니다.",
+        details: {
+          token: token ? "present" : "missing",
+          userType: userType ? "present" : "missing",
+          allParams: Object.fromEntries(searchParams.entries()),
+          url: window.location.href,
+        },
+      };
+      localStorage.setItem("oauth_error_info", JSON.stringify(errorInfo));
+      
       navigate("/login?error=인증에 실패했습니다. 토큰 또는 사용자 정보가 없습니다.", { replace: true });
     }
   }, [searchParams, navigate, setAuth]);
