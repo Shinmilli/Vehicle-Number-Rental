@@ -460,18 +460,25 @@ export class AuthService {
       return { message: "비밀번호 재설정 링크가 이메일로 전송되었습니다." };
     }
 
+    // 이메일이 없는 경우 처리
+    if (!user.email) {
+      logger.warn(`User ${user.id} does not have an email address`);
+      // 보안을 위해 이메일이 없어도 성공 메시지 반환
+      return { message: "비밀번호 재설정 링크가 이메일로 전송되었습니다." };
+    }
+
     // 재설정 토큰 생성 (24시간 유효)
     const resetToken = require("crypto").randomBytes(32).toString("hex");
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
     // 기존 토큰 삭제 (사용자가 여러 번 요청한 경우)
-    await prisma.passwordReset.deleteMany({
+    await (prisma as any).passwordReset.deleteMany({
       where: { userId: user.id, used: false },
     });
 
     // 새 토큰 저장
-    await prisma.passwordReset.create({
+    await (prisma as any).passwordReset.create({
       data: {
         userId: user.id,
         token: resetToken,
@@ -494,7 +501,7 @@ export class AuthService {
         });
         logger.info(`Password reset email sent to user: ${user.id}, email: ${user.email}`);
       } else {
-        logger.warn("Email service not configured. RESEND_API_KEY not set. Token will be returned in response.");
+        logger.warn("Email service not configured. RESEND_API_KEY not set.");
       }
     } catch (error) {
       // 이메일 전송 실패해도 토큰은 반환 (개발 환경 대비)
@@ -504,18 +511,10 @@ export class AuthService {
       });
     }
     
-    logger.info(`Password reset token generated for user: ${user.id}, email: ${user.email}`, {
-      token: resetToken,
-      reset_url: resetUrl,
-    });
-
-    // 개발 환경이거나 이메일 서비스가 설정되지 않은 경우 토큰 반환
-    // 프로덕션에서는 이메일 전송 성공 시 토큰 반환 제거 가능
-    const shouldReturnToken = process.env.NODE_ENV === "development" || !process.env.RESEND_API_KEY;
+    logger.info(`Password reset token generated for user: ${user.id}, email: ${user.email}`);
     
     return { 
       message: "비밀번호 재설정 링크가 이메일로 전송되었습니다.",
-      ...(shouldReturnToken && { token: resetToken, resetUrl: resetUrl }),
     };
   }
 
@@ -524,7 +523,7 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string) {
     // 토큰으로 재설정 요청 찾기
-    const resetRequest = await prisma.passwordReset.findUnique({
+    const resetRequest = await (prisma as any).passwordReset.findUnique({
       where: { token },
       include: { user: true },
     });
@@ -556,7 +555,7 @@ export class AuthService {
     });
 
     // 토큰 사용 처리
-    await prisma.passwordReset.update({
+    await (prisma as any).passwordReset.update({
       where: { id: resetRequest.id },
       data: { used: true },
     });

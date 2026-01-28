@@ -53,6 +53,14 @@ class UserRepository {
         return matchedUser || null;
     }
     /**
+     * 이메일로 사용자 조회
+     */
+    async findByEmail(email) {
+        return prisma_1.prisma.user.findUnique({
+            where: { email },
+        });
+    }
+    /**
      * ID로 사용자 조회
      */
     async findById(id) {
@@ -65,10 +73,7 @@ class UserRepository {
      */
     async create(data) {
         return prisma_1.prisma.user.create({
-            data: {
-                ...data,
-                email: data.email || null, // 빈 문자열을 null로 변환
-            },
+            data,
         });
     }
     /**

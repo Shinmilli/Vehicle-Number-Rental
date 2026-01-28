@@ -61,6 +61,33 @@ class CompanyRepository {
         return matchedCompany || null;
     }
     /**
+     * 전화번호로 모든 회사 조회 (하이픈 포함/미포함 모두 지원)
+     */
+    async findAllByPhone(phone) {
+        const normalizedInput = this.normalizePhone(phone);
+        const formattedPhone = this.formatPhone(normalizedInput);
+        // 모든 회사를 가져와서 정규화된 전화번호로 필터링
+        const allCompanies = await prisma_1.prisma.company.findMany();
+        const matchedCompanies = allCompanies.filter((company) => this.normalizePhone(company.phone) === normalizedInput);
+        return matchedCompanies;
+    }
+    /**
+     * 이메일로 회사 조회
+     */
+    async findByEmail(email) {
+        return prisma_1.prisma.company.findFirst({
+            where: { email },
+        });
+    }
+    /**
+     * 이메일로 모든 회사 조회
+     */
+    async findAllByEmail(email) {
+        return prisma_1.prisma.company.findMany({
+            where: { email },
+        });
+    }
+    /**
      * ID로 회사 조회
      */
     async findById(id) {
@@ -73,7 +100,15 @@ class CompanyRepository {
      */
     async create(data) {
         return prisma_1.prisma.company.create({
-            data,
+            data: {
+                businessNumber: data.businessNumber,
+                companyName: data.companyName,
+                representative: data.representative,
+                phone: data.phone,
+                contactPhone: data.contactPhone || undefined,
+                email: data.email || undefined,
+                password: data.password,
+            },
         });
     }
     /**
