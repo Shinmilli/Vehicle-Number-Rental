@@ -14,4 +14,5 @@ router.put("/profile", authMiddleware_1.authMiddleware, companyController_1.upda
 router.put("/contact-phone", authMiddleware_1.authMiddleware, companyController_1.updateContactPhone);
 router.get("/stats", authMiddleware_1.authMiddleware, companyController_1.getCompanyStats);
 router.put("/verify/:companyId", authMiddleware_1.authMiddleware, companyController_1.updateCompanyVerification);
+router.post("/add", authMiddleware_1.authMiddleware, companyController_1.addCompany);
 exports.default = router;
