@@ -54,6 +54,7 @@ app.get("/", (req, res) => {
     version: "1.0.0",
     endpoints: {
       health: "/health",
+      ready: "/ready",
       auth: "/api/auth",
       vehicles: "/api/vehicles",
       companies: "/api/companies",
@@ -62,10 +63,36 @@ app.get("/", (req, res) => {
   });
 });
 
-// 헬스체크 (cron keep-alive용: 전체 데이터 조회 없이 DB만 SELECT 1)
+const pingDb = (ms = 3000) =>
+  Promise.race([
+    prisma.$queryRaw`SELECT 1`,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("db ping timeout")), ms)
+    ),
+  ]);
+
+// cron / Render keep-alive: 프로세스가 켜져 있으면 항상 200
 app.get("/health", async (_req, res) => {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await pingDb();
+    res.status(200).json({
+      status: "ok",
+      db: "ok",
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    res.status(200).json({
+      status: "ok",
+      db: "unavailable",
+      timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+// DB까지 준비됐는지 확인할 때만 503
+app.get("/ready", async (_req, res) => {
+  try {
+    await pingDb();
     res.status(200).json({
       status: "ok",
       db: "ok",

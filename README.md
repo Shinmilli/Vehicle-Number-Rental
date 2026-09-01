@@ -92,7 +92,8 @@ npm run dev
 | | |
 | :--- | :--- |
 | 기본 포트 | `server/.env`의 `PORT` (예: `3001`) |
-| 헬스체크 | `GET /health` — DB `SELECT 1`만 치고 `200` 반환 |
+| 헬스체크 | `GET /health` — 서버가 켜져 있으면 항상 `200` (DB는 body의 `db` 필드) |
+| 레디니스 | `GET /ready` — DB까지 되면 `200`, 안 되면 `503` |
 
 cron keep-alive는 차량 목록 대신 이 주소를 쓰면 됩니다.
 
@@ -136,7 +137,8 @@ npm start
 
 | Method | Path | 설명 |
 | :---: | :--- | :--- |
-| <img src="https://img.shields.io/badge/GET-22863a?style=flat-square" alt="GET" /> | `/health` | 서버 + DB 생존 확인 |
+| <img src="https://img.shields.io/badge/GET-22863a?style=flat-square" alt="GET" /> | `/health` | 서버 생존 확인 (cron용, 항상 200) |
+| <img src="https://img.shields.io/badge/GET-22863a?style=flat-square" alt="GET" /> | `/ready` | DB 준비 여부 (실패 시 503) |
 
 ### Auth
 
