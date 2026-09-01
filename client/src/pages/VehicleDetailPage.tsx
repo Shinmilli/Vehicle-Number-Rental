@@ -1,5 +1,5 @@
 // src/pages/VehicleDetailPage.tsx
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle } from "../types/vehicle";
@@ -15,30 +15,34 @@ const VehicleDetailPage: React.FC = () => {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
-  const loadRequestId = useRef(0);
-
-  const loadVehicle = useCallback(async (vehicleId: string) => {
-    const requestId = ++loadRequestId.current;
-    setIsLoading(true);
-    try {
-      const data = await vehicleService.getVehicle(vehicleId);
-      if (requestId !== loadRequestId.current) return;
-      setVehicle(data);
-    } catch (error) {
-      if (requestId !== loadRequestId.current) return;
-      console.error("Failed to load vehicle:", error);
-      window.alert("차량 정보를 불러오는데 실패했습니다.");
-      navigate(-1);
-    } finally {
-      if (requestId === loadRequestId.current) setIsLoading(false);
-    }
-  }, [navigate]);
+  const navigateRef = useRef(navigate);
+  navigateRef.current = navigate;
 
   useEffect(() => {
-    if (id) {
-      loadVehicle(id);
-    }
-  }, [id, loadVehicle]);
+    if (!id) return;
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    vehicleService
+      .getVehicle(id)
+      .then((data) => {
+        if (!cancelled) setVehicle(data);
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load vehicle:", error);
+        window.alert("차량 정보를 불러오는데 실패했습니다.");
+        navigateRef.current(-1);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   if (isLoading) {
     return (
