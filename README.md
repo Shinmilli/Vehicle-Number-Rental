@@ -8,16 +8,24 @@
 
 <br />
 
-<img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=000" alt="React" />
-<img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=fff" alt="TypeScript" />
-<img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=fff" alt="Tailwind CSS" />
-<img src="https://img.shields.io/badge/Zustand-5-433E38?style=for-the-badge&logo=react&logoColor=fff" alt="Zustand" />
-<br />
-<img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=fff" alt="Express" />
-<img src="https://img.shields.io/badge/Prisma-6-2D3748?style=for-the-badge&logo=prisma&logoColor=fff" alt="Prisma" />
+## 📚 Tech Stack 📚
+
+### ✨ Frontend ✨
+
+<img src="https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=000" alt="React 19" />
+<img src="https://img.shields.io/badge/TypeScript_5-3178C6?style=for-the-badge&logo=typescript&logoColor=fff" alt="TypeScript 5" />
+<img src="https://img.shields.io/badge/Tailwind_CSS_3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=fff" alt="Tailwind CSS 3" />
+<img src="https://img.shields.io/badge/Zustand_5-FF6B35?style=for-the-badge" alt="Zustand 5" />
+
+### ⚒️ Backend ⚒️
+
+<img src="https://img.shields.io/badge/Express_5-000000?style=for-the-badge&logo=express&logoColor=fff" alt="Express 5" />
+<img src="https://img.shields.io/badge/Prisma_6-16A394?style=for-the-badge&logo=prisma&logoColor=fff" alt="Prisma 6" />
 <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=fff" alt="PostgreSQL" />
 <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=fff" alt="Supabase" />
-<br />
+
+### 🚀 Deploy & Services 🚀
+
 <img src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=000" alt="Render" />
 <img src="https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=fff" alt="Vercel" />
 <img src="https://img.shields.io/badge/Resend-000000?style=for-the-badge&logo=resend&logoColor=fff" alt="Resend" />
@@ -56,8 +64,8 @@ Vehicle-Number-Rental
 
 | 구분 | 경로 | 스택 |
 | :--- | :--- | :--- |
-| Frontend | `client/` | <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=000" alt="React" /> <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=fff" alt="TypeScript" /> <img src="https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=fff" alt="Tailwind" /> <img src="https://img.shields.io/badge/Zustand-433E38?style=flat-square" alt="Zustand" /> |
-| Backend | `server/` | <img src="https://img.shields.io/badge/Express-000?style=flat-square&logo=express&logoColor=fff" alt="Express" /> <img src="https://img.shields.io/badge/Prisma-2D3748?style=flat-square&logo=prisma&logoColor=fff" alt="Prisma" /> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=fff" alt="PostgreSQL" /> |
+| Frontend | `client/` | <img src="https://img.shields.io/badge/React_19-61DAFB?style=flat-square&logo=react&logoColor=000" alt="React 19" /> <img src="https://img.shields.io/badge/TypeScript_5-3178C6?style=flat-square&logo=typescript&logoColor=fff" alt="TypeScript 5" /> <img src="https://img.shields.io/badge/Tailwind_3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=fff" alt="Tailwind 3" /> <img src="https://img.shields.io/badge/Zustand_5-FF6B35?style=flat-square" alt="Zustand 5" /> |
+| Backend | `server/` | <img src="https://img.shields.io/badge/Express_5-000?style=flat-square&logo=express&logoColor=fff" alt="Express 5" /> <img src="https://img.shields.io/badge/Prisma_6-16A394?style=flat-square&logo=prisma&logoColor=fff" alt="Prisma 6" /> <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=fff" alt="PostgreSQL" /> |
 | 배포 | — | Frontend: Vercel · API: [Render](https://vehicle-number-rental.onrender.com) · DB: Supabase |
 
 ```mermaid
