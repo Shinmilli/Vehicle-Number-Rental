@@ -14,8 +14,6 @@ const VehicleDetailPage: React.FC = () => {
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isContactExpanded, setIsContactExpanded] = useState(false);
-  const [isContactLoading, setIsContactLoading] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
   const loadRequestId = useRef(0);
 
@@ -51,20 +49,6 @@ const VehicleDetailPage: React.FC = () => {
       loadVehicle(id, true);
     }
   }, [id, isAuthenticated, loadVehicle]);
-
-  const handleRevealContact = async () => {
-    if (!id) {
-      setIsContactExpanded(true);
-      return;
-    }
-    setIsContactLoading(true);
-    try {
-      await loadVehicle(id, true);
-    } finally {
-      setIsContactLoading(false);
-      setIsContactExpanded(true);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -246,17 +230,7 @@ const VehicleDetailPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-700">전화번호</span>
-                      {!isContactExpanded ? (
-                        <button
-                          type="button"
-                          className="font-semibold hover:underline disabled:opacity-60"
-                          style={{ color: COLORS.navy.primary }}
-                          onClick={handleRevealContact}
-                          disabled={isContactLoading}
-                        >
-                          {isContactLoading ? "불러오는 중..." : "자세히 보기"}
-                        </button>
-                      ) : hasContact ? (
+                      {hasContact ? (
                         <a
                           href={`tel:${phoneToShow}`}
                           className="font-semibold hover:underline"
@@ -269,11 +243,7 @@ const VehicleDetailPage: React.FC = () => {
                       )}
                     </div>
                     <div className="mt-4 pt-4 border-t">
-                      {!isContactExpanded ? (
-                        <p className="text-sm text-gray-600">
-                          연락처는 “자세히 보기”를 눌러 확인할 수 있습니다.
-                        </p>
-                      ) : hasContact ? (
+                      {hasContact ? (
                         <p className="text-sm text-gray-600">
                           💡 위 번호로 직접 연락하여 상담하실 수 있습니다.
                         </p>
