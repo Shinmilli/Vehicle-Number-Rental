@@ -36,7 +36,7 @@ const VehicleDetailPage: React.FC = () => {
         navigateRef.current(-1);
       })
       .finally(() => {
-        if (!cancelled) setIsLoading(false);
+        setIsLoading(false);
       });
 
     return () => {
