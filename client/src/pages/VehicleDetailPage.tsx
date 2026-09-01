@@ -17,24 +17,20 @@ const VehicleDetailPage: React.FC = () => {
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
   const loadRequestId = useRef(0);
 
-  const loadVehicle = useCallback(async (vehicleId: string, silent = false) => {
+  const loadVehicle = useCallback(async (vehicleId: string) => {
     const requestId = ++loadRequestId.current;
-    if (!silent) setIsLoading(true);
+    setIsLoading(true);
     try {
       const data = await vehicleService.getVehicle(vehicleId);
-      if (requestId !== loadRequestId.current) return null;
+      if (requestId !== loadRequestId.current) return;
       setVehicle(data);
-      return data;
     } catch (error) {
-      if (requestId !== loadRequestId.current) return null;
+      if (requestId !== loadRequestId.current) return;
       console.error("Failed to load vehicle:", error);
-      if (!silent) {
-        window.alert("차량 정보를 불러오는데 실패했습니다.");
-        navigate(-1);
-      }
-      return null;
+      window.alert("차량 정보를 불러오는데 실패했습니다.");
+      navigate(-1);
     } finally {
-      if (!silent && requestId === loadRequestId.current) setIsLoading(false);
+      if (requestId === loadRequestId.current) setIsLoading(false);
     }
   }, [navigate]);
 
@@ -43,12 +39,6 @@ const VehicleDetailPage: React.FC = () => {
       loadVehicle(id);
     }
   }, [id, loadVehicle]);
-
-  useEffect(() => {
-    if (id && isAuthenticated) {
-      loadVehicle(id, true);
-    }
-  }, [id, isAuthenticated, loadVehicle]);
 
   if (isLoading) {
     return (
