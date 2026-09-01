@@ -42,7 +42,7 @@ export const getVehicles = async (req: Request, res: Response) => {
   }
 };
 
-// 차량 상세 조회 - 연락처는 제외, 조회수 증가
+// 차량 상세 조회 - 비로그인 시 연락처 제외, 로그인 시 포함, 조회수 증가
 export const getVehicle = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

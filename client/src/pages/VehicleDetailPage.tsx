@@ -1,5 +1,5 @@
 // src/pages/VehicleDetailPage.tsx
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { vehicleService } from "../services/vehicleService";
 import { Vehicle } from "../types/vehicle";
@@ -15,19 +15,28 @@ const VehicleDetailPage: React.FC = () => {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isContactExpanded, setIsContactExpanded] = useState(false);
+  const [isContactLoading, setIsContactLoading] = useState(false);
   const [showLoginRequiredModal, setShowLoginRequiredModal] = useState(false);
+  const loadRequestId = useRef(0);
 
-  const loadVehicle = useCallback(async (vehicleId: string) => {
-    setIsLoading(true);
+  const loadVehicle = useCallback(async (vehicleId: string, silent = false) => {
+    const requestId = ++loadRequestId.current;
+    if (!silent) setIsLoading(true);
     try {
       const data = await vehicleService.getVehicle(vehicleId);
+      if (requestId !== loadRequestId.current) return null;
       setVehicle(data);
+      return data;
     } catch (error) {
+      if (requestId !== loadRequestId.current) return null;
       console.error("Failed to load vehicle:", error);
-      window.alert("차량 정보를 불러오는데 실패했습니다.");
-      navigate(-1);
+      if (!silent) {
+        window.alert("차량 정보를 불러오는데 실패했습니다.");
+        navigate(-1);
+      }
+      return null;
     } finally {
-      setIsLoading(false);
+      if (!silent && requestId === loadRequestId.current) setIsLoading(false);
     }
   }, [navigate]);
 
@@ -36,6 +45,26 @@ const VehicleDetailPage: React.FC = () => {
       loadVehicle(id);
     }
   }, [id, loadVehicle]);
+
+  useEffect(() => {
+    if (id && isAuthenticated) {
+      loadVehicle(id, true);
+    }
+  }, [id, isAuthenticated, loadVehicle]);
+
+  const handleRevealContact = async () => {
+    if (!id) {
+      setIsContactExpanded(true);
+      return;
+    }
+    setIsContactLoading(true);
+    try {
+      await loadVehicle(id, true);
+    } finally {
+      setIsContactLoading(false);
+      setIsContactExpanded(true);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -220,11 +249,12 @@ const VehicleDetailPage: React.FC = () => {
                       {!isContactExpanded ? (
                         <button
                           type="button"
-                          className="font-semibold hover:underline"
+                          className="font-semibold hover:underline disabled:opacity-60"
                           style={{ color: COLORS.navy.primary }}
-                          onClick={() => setIsContactExpanded(true)}
+                          onClick={handleRevealContact}
+                          disabled={isContactLoading}
                         >
-                          자세히 보기
+                          {isContactLoading ? "불러오는 중..." : "자세히 보기"}
                         </button>
                       ) : hasContact ? (
                         <a
@@ -249,7 +279,7 @@ const VehicleDetailPage: React.FC = () => {
                         </p>
                       ) : (
                         <p className="text-sm text-gray-600">
-                          연락처 정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+                          이 회사에 등록된 연락처가 없습니다. 로그인 세션이 만료됐을 수 있으니 다시 로그인한 뒤 시도해주세요.
                         </p>
                       )}
                     </div>

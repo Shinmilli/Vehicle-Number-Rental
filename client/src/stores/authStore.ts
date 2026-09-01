@@ -1,6 +1,7 @@
 // src/stores/authStore.ts
 import { create } from "zustand";
 import { User, Company, UserType } from "../types/user";
+import { isTokenExpired } from "../utils/token";
 
 interface AuthState {
   token: string | null;
@@ -68,6 +69,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const defaultCompanyId = localStorage.getItem("defaultCompanyId");
 
     if (token && userStr && userType) {
+      if (isTokenExpired(token)) {
+        get().logout();
+        set({ defaultCompanyId: defaultCompanyId || null });
+        return;
+      }
       set({
         token,
         user: JSON.parse(userStr),

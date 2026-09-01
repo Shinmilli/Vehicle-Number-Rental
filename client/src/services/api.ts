@@ -1,5 +1,7 @@
 // src/services/api.ts
 import axios from "axios";
+import { isTokenExpired } from "../utils/token";
+import { useAuthStore } from "../stores/authStore";
 
 // 환경 변수 확인 및 디버깅
 const envApiUrl = process.env.REACT_APP_API_URL;
@@ -42,7 +44,11 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      if (isTokenExpired(token)) {
+        useAuthStore.getState().logout();
+      } else {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },
