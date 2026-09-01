@@ -8,6 +8,7 @@ describe('Basic API Tests', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('status', 'ok');
+    expect(response.body).toHaveProperty('db', 'ok');
   });
 
   test('차량 목록 조회 (공개 엔드포인트)', async () => {

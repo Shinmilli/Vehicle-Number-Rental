@@ -12,6 +12,7 @@ import paymentRoutes from "./routes/paymentRoutes";
 
 // 미들웨어 import
 import { errorHandler } from "./middlewares/errorHandler";
+import { prisma } from "./utils/prisma";
 
 dotenv.config();
 
@@ -61,9 +62,22 @@ app.get("/", (req, res) => {
   });
 });
 
-// 헬스체크
-app.get("/health", (req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+// 헬스체크 (cron keep-alive용: 전체 데이터 조회 없이 DB만 SELECT 1)
+app.get("/health", async (_req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      status: "ok",
+      db: "ok",
+      timestamp: new Date().toISOString(),
+    });
+  } catch {
+    res.status(503).json({
+      status: "error",
+      db: "unavailable",
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // API 라우트
