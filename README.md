@@ -40,6 +40,27 @@
 
 ## 주요 기능
 
+<table>
+  <tr>
+    <td align="center" width="25%">
+      <h3>랜딩</h3>
+      <img src="docs/screenshots/landing.png" alt="랜딩 — 영업용 차량 번호 임대 중개 플랫폼" />
+    </td>
+    <td align="center" width="25%">
+      <h3>차량 번호 찾기</h3>
+      <img src="docs/screenshots/vehicle-list.png" alt="차량 번호 목록 및 검색 필터" />
+    </td>
+    <td align="center" width="25%">
+      <h3>상세 · 로그인 유도</h3>
+      <img src="docs/screenshots/vehicle-detail.png" alt="차량 상세에서 로그인 필요 안내" />
+    </td>
+    <td align="center" width="25%">
+      <h3>로그인</h3>
+      <img src="docs/screenshots/login.png" alt="기사 · 회사 로그인 및 소셜 로그인" />
+    </td>
+  </tr>
+</table>
+
 | 구분 | 기사 | 회사 |
 | :--- | :--- | :--- |
 | **가입** | 이메일 · 카카오 · 구글 | 사업자등록번호 인증 |
@@ -70,9 +91,9 @@ Vehicle-Number-Rental
 
 ```mermaid
 flowchart LR
-  A["브라우저<br/>client/"] -->|REST| B["Express API<br/>server/"]
-  B --> C["PostgreSQL<br/>Supabase"]
-  B --> D["Resend<br/>메일"]
+  A["브라우저 / client"] -->|REST| B["Express API / server"]
+  B --> C["PostgreSQL / Supabase"]
+  B --> D["Resend / 메일"]
 ```
 
 ---
