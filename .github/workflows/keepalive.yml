@@ -1,0 +1,40 @@
+
+name: Render Keepalive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Keep Render server alive
+        env:
+          KEEP_ALIVE_URL: ${{ secrets.KEEP_ALIVE_URL }}
+        run: |
+          if [ -z "$KEEP_ALIVE_URL" ]; then
+            echo "KEEP_ALIVE_URL is missing"
+            exit 1
+          fi
+
+          for attempt in 1 2 3 4 5; do
+            echo "Attempt $attempt/5"
+
+            if curl -fsS \
+              --connect-timeout 15 \
+              --max-time 120 \
+              "$KEEP_ALIVE_URL"; then
+              echo "Keepalive successful"
+              exit 0
+            fi
+
+            echo "Failed. Waiting 15 seconds..."
+            sleep 15
+          done
+
+          echo "All attempts failed"
+          exit 1

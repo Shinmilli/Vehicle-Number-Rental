@@ -63,49 +63,72 @@ app.get("/", (req, res) => {
   });
 });
 
-const pingDb = (ms = 3000) =>
-  Promise.race([
-    prisma.$queryRaw`SELECT 1`,
-    new Promise((_, reject) =>
-      setTimeout(() => reject(new Error("db ping timeout")), ms)
-    ),
-  ]);
+// DB 연결 확인용
+const pingDb = async (ms = 5000) => {
+  let timer: ReturnType<typeof setTimeout> | undefined
 
-// cron / Render keep-alive: 프로세스가 켜져 있으면 항상 200
-app.get("/health", async (_req, res) => {
   try {
-    await pingDb();
-    res.status(200).json({
-      status: "ok",
-      db: "ok",
-      timestamp: new Date().toISOString(),
-    });
-  } catch {
-    res.status(200).json({
-      status: "ok",
-      db: "unavailable",
-      timestamp: new Date().toISOString(),
-    });
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1`,
+      new Promise((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error("DB ping timeout")),
+          ms
+        )
+      }),
+    ])
+  } finally {
+    if (timer) clearTimeout(timer)
   }
-});
+}
 
-// DB까지 준비됐는지 확인할 때만 503
+// 1. Render Keep-alive 전용
+// DB 연결 여부와 관계없이 서버가 요청을 받으면 200
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  })
+})
+
+// 2. DB 연결 상태 확인
 app.get("/ready", async (_req, res) => {
   try {
-    await pingDb();
+    await pingDb()
+
     res.status(200).json({
       status: "ok",
       db: "ok",
-      timestamp: new Date().toISOString(),
-    });
-  } catch {
+    })
+  } catch (error) {
+    console.error("[READY CHECK FAILED]", error)
+
     res.status(503).json({
       status: "error",
       db: "unavailable",
-      timestamp: new Date().toISOString(),
-    });
+    })
   }
-});
+})
+
+// 3. DB 상태 별도 모니터링
+app.get("/health/db", async (_req, res) => {
+  try {
+    await pingDb()
+
+    res.status(200).json({
+      status: "ok",
+      db: "ok",
+    })
+  } catch (error) {
+    console.error("[HEALTH DB FAILED]", error)
+
+    res.status(503).json({
+      status: "error",
+      db: "unavailable",
+    })
+  }
+})
 
 // API 라우트
 app.use("/api/auth", authRoutes);

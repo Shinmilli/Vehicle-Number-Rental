@@ -3,12 +3,11 @@ import app from '../src/app';
 
 describe('Basic API Tests', () => {
   test('헬스체크 엔드포인트', async () => {
-    const response = await request(app)
-      .get('/health');
-
+    const response = await request(app).get('/health');
+  
     expect(response.status).toBe(200);
     expect(response.body).toHaveProperty('status', 'ok');
-    expect(response.body).toHaveProperty('db', 'ok');
+    expect(response.body).toHaveProperty('uptime');
   });
 
   test('레디니스 엔드포인트', async () => {

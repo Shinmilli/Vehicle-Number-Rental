@@ -1,0 +1,34 @@
+
+name: Supabase DB Check
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  check-db:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check Supabase connection
+        run: |
+          URL="https://vehicle-number-rental.onrender.com/health/db"
+
+          for attempt in 1 2 3 4; do
+            echo "DB check attempt $attempt/4"
+
+            if curl -fsS \
+              --connect-timeout 15 \
+              --max-time 120 \
+              "$URL"; then
+              echo "DB connection successful"
+              exit 0
+            fi
+
+            sleep 20
+          done
+
+          echo "DB connection failed"
+          exit 1
